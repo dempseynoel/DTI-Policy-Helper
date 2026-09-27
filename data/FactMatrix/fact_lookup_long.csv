@@ -1,0 +1,126 @@
+fact_label,fact_key,doc_id,edition_year,version,status,effective_from,effective_to,raw_value,display_value
+Standard excess,standard_excess,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,250,£250
+Standard excess,standard_excess,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,250,£250
+Standard excess,standard_excess,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,250,£250
+Standard excess,standard_excess,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,300,£300
+Standard excess,standard_excess,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,350,£350
+Escape of water excess (wet room),eow_wetroom_excess,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,500,£500
+Escape of water excess (wet room),eow_wetroom_excess,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,500,£500
+Escape of water excess (wet room),eow_wetroom_excess,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,500,£500
+Escape of water excess (wet room),eow_wetroom_excess,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,600,£600
+Escape of water excess (wet room),eow_wetroom_excess,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,600,£600
+Trace and access limit,trace_access_limit,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,5000,"£5,000"
+Trace and access limit,trace_access_limit,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,5000,"£5,000"
+Trace and access limit,trace_access_limit,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,5000,"£5,000"
+Trace and access limit,trace_access_limit,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,7500,"£7,500"
+Trace and access limit,trace_access_limit,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,10000,"£10,000"
+Gradual-leak time bar,gradual_leak_days,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,14,14 days
+Gradual-leak time bar,gradual_leak_days,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,14,14 days
+Gradual-leak time bar,gradual_leak_days,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,14,14 days
+Gradual-leak time bar,gradual_leak_days,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,21,21 days
+Gradual-leak time bar,gradual_leak_days,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,21,21 days
+Frozen-pipe drain-down trigger (unoccupied),frozen_drain_days,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,30,30 days
+Frozen-pipe drain-down trigger (unoccupied),frozen_drain_days,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,30,30 days
+Frozen-pipe drain-down trigger (unoccupied),frozen_drain_days,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,30,30 days
+Frozen-pipe drain-down trigger (unoccupied),frozen_drain_days,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,30,30 days
+Frozen-pipe drain-down trigger (unoccupied),frozen_drain_days,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,45,45 days
+Storm wind-speed threshold,storm_knots,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,48,48 knots
+Storm wind-speed threshold,storm_knots,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,47,47 knots
+Storm wind-speed threshold,storm_knots,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,47,47 knots
+Storm wind-speed threshold,storm_knots,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,47,47 knots
+Storm wind-speed threshold,storm_knots,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,47,47 knots
+Garden / outbuildings limit,outbuildings_limit,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,1000,"£1,000"
+Garden / outbuildings limit,outbuildings_limit,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,1500,"£1,500"
+Garden / outbuildings limit,outbuildings_limit,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,1500,"£1,500"
+Garden / outbuildings limit,outbuildings_limit,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,1500,"£1,500"
+Garden / outbuildings limit,outbuildings_limit,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,2000,"£2,000"
+Flood excess (flood-risk postcode),flood_excess,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,1000,"£1,000"
+Flood excess (flood-risk postcode),flood_excess,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,1000,"£1,000"
+Flood excess (flood-risk postcode),flood_excess,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,1000,"£1,000"
+Flood excess (flood-risk postcode),flood_excess,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,1500,"£1,500"
+Flood excess (flood-risk postcode),flood_excess,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,1500,"£1,500"
+Weather-event aggregation window,weather_multi_hours,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,72,72 hours
+Weather-event aggregation window,weather_multi_hours,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,72,72 hours
+Weather-event aggregation window,weather_multi_hours,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,72,72 hours
+Weather-event aggregation window,weather_multi_hours,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,72,72 hours
+Weather-event aggregation window,weather_multi_hours,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,96,96 hours
+Emergency repair (no prior authorisation),emergency_repair_limit,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,500,£500
+Emergency repair (no prior authorisation),emergency_repair_limit,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,500,£500
+Emergency repair (no prior authorisation),emergency_repair_limit,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,500,£500
+Emergency repair (no prior authorisation),emergency_repair_limit,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,750,£750
+Emergency repair (no prior authorisation),emergency_repair_limit,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,1000,"£1,000"
+Pedal cycle theft limit,pedal_cycle_limit,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,500,£500
+Pedal cycle theft limit,pedal_cycle_limit,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,500,£500
+Pedal cycle theft limit,pedal_cycle_limit,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,600,£600
+Pedal cycle theft limit,pedal_cycle_limit,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,750,£750
+Pedal cycle theft limit,pedal_cycle_limit,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,750,£750
+Unoccupied-property period,unoccupied_days,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,60,60 days
+Unoccupied-property period,unoccupied_days,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,60,60 days
+Unoccupied-property period,unoccupied_days,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,60,60 days
+Unoccupied-property period,unoccupied_days,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,60,60 days
+Unoccupied-property period,unoccupied_days,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,45,45 days
+Accidental damage excess,ad_excess,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,150,£150
+Accidental damage excess,ad_excess,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,150,£150
+Accidental damage excess,ad_excess,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,150,£150
+Accidental damage excess,ad_excess,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,150,£150
+Accidental damage excess,ad_excess,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,200,£200
+Overall buildings limit,buildings_limit,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,500000,"£500,000"
+Overall buildings limit,buildings_limit,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,500000,"£500,000"
+Overall buildings limit,buildings_limit,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,500000,"£500,000"
+Overall buildings limit,buildings_limit,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,750000,"£750,000"
+Overall buildings limit,buildings_limit,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,1000000,"£1,000,000"
+Overall contents limit,contents_limit,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,75000,"£75,000"
+Overall contents limit,contents_limit,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,75000,"£75,000"
+Overall contents limit,contents_limit,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,75000,"£75,000"
+Overall contents limit,contents_limit,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,100000,"£100,000"
+Overall contents limit,contents_limit,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,100000,"£100,000"
+Police notification window (theft),police_hours,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,48,48 hours
+Police notification window (theft),police_hours,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,24,24 hours
+Police notification window (theft),police_hours,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,24,24 hours
+Police notification window (theft),police_hours,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,24,24 hours
+Police notification window (theft),police_hours,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,24,24 hours
+Escape of oil / fuel cover,escape_of_fuel,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,False,No
+Escape of oil / fuel cover,escape_of_fuel,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,True,Yes
+Escape of oil / fuel cover,escape_of_fuel,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,True,Yes
+Escape of oil / fuel cover,escape_of_fuel,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,True,Yes
+Escape of oil / fuel cover,escape_of_fuel,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,True,Yes
+Escape of fuel limit,fuel_limit,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,2000,"£2,000"
+Escape of fuel limit,fuel_limit,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,2000,"£2,000"
+Escape of fuel limit,fuel_limit,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,2000,"£2,000"
+Escape of fuel limit,fuel_limit,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,2500,"£2,500"
+Escape of fuel limit,fuel_limit,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,2500,"£2,500"
+Communicable disease exclusion,communicable_disease_excl,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,False,No
+Communicable disease exclusion,communicable_disease_excl,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,True,Yes
+Communicable disease exclusion,communicable_disease_excl,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,True,Yes
+Communicable disease exclusion,communicable_disease_excl,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,True,Yes
+Communicable disease exclusion,communicable_disease_excl,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,True,Yes
+Home emergency section (optional),home_emergency,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,False,No
+Home emergency section (optional),home_emergency,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,False,No
+Home emergency section (optional),home_emergency,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,False,No
+Home emergency section (optional),home_emergency,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,True,Yes
+Home emergency section (optional),home_emergency,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,True,Yes
+Home emergency annual limit,he_limit,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,1000,"£1,000"
+Home emergency annual limit,he_limit,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,1000,"£1,000"
+Home emergency annual limit,he_limit,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,1000,"£1,000"
+Home emergency annual limit,he_limit,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,1000,"£1,000"
+Home emergency annual limit,he_limit,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,1500,"£1,500"
+Matching items / pairs & sets basis,matching_sets,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,False,No
+Matching items / pairs & sets basis,matching_sets,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,False,No
+Matching items / pairs & sets basis,matching_sets,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,False,No
+Matching items / pairs & sets basis,matching_sets,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,True,Yes
+Matching items / pairs & sets basis,matching_sets,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,True,Yes
+Electric vehicle charging point note,ev_charger,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,False,No
+Electric vehicle charging point note,ev_charger,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,False,No
+Electric vehicle charging point note,ev_charger,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,False,No
+Electric vehicle charging point note,ev_charger,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,False,No
+Electric vehicle charging point note,ev_charger,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,True,Yes
+Flood Re definition & note,flood_re_note,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,False,No
+Flood Re definition & note,flood_re_note,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,False,No
+Flood Re definition & note,flood_re_note,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,False,No
+Flood Re definition & note,flood_re_note,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,False,No
+Flood Re definition & note,flood_re_note,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,True,Yes
+Excess-per-claim clarification,excess_per_claim_clarification,DTI-HOME-PW-2022-v1.0,2022,1.0,ARCHIVED,1 January 2022,31 December 2022,False,No
+Excess-per-claim clarification,excess_per_claim_clarification,DTI-HOME-PW-2023-v1.0,2023,1.0,SUPERSEDED,1 January 2023,30 June 2023,False,No
+Excess-per-claim clarification,excess_per_claim_clarification,DTI-HOME-PW-2023-v1.1,2023,1.1,SUPERSEDED,1 July 2023,31 December 2023,True,Yes
+Excess-per-claim clarification,excess_per_claim_clarification,DTI-HOME-PW-2024-v1.0,2024,1.0,SUPERSEDED,1 January 2024,31 December 2024,True,Yes
+Excess-per-claim clarification,excess_per_claim_clarification,DTI-HOME-PW-2025-v1.0,2025,1.0,CURRENT,1 January 2025,31 December 2025,True,Yes
