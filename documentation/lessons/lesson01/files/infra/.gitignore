@@ -1,0 +1,6 @@
+# Terraform working files. Commit .terraform.lock.hcl; never commit state.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log

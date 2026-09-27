@@ -1,0 +1,108 @@
+# One environment's deploy, identical for dev, test and prod. Called by deploy.yml.
+#
+# The job declares `environment:`, so it only receives that environment's AZURE_CLIENT_ID,
+# and Azure only honours the token because the federated credential names that environment.
+# prod's required reviewers approve before this job starts.
+name: _deploy-env
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        type: string
+        required: true
+      sha:
+        type: string
+        required: true
+      digest:
+        type: string
+        required: true
+      promotion_gate:
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.env }}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      APP_ENV: ${{ inputs.env }}
+      GIT_SHA: ${{ inputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[ops,evaluation]"
+      - uses: actions/download-artifact@v4
+        with:
+          name: chunks
+          path: artifacts
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Stop if this environment has drifted from deploy/environments.yaml
+        run: python scripts/check_env.py --env "$APP_ENV"
+
+      - name: Load the index from the SAME chunks.jsonl the build produced
+        run: python -m dti_rag.search.loader --chunks artifacts/chunks.jsonl
+
+      - name: Deploy the image digest with this environment's configuration
+        env:
+          IMAGE: ${{ vars.ACR_NAME }}.azurecr.io/dti-rag@${{ inputs.digest }}
+        run: |
+          # Replace, never merge: a variable deleted from the file disappears from the app.
+          mapfile -t VARS < <(grep -E '^[A-Z_]+=.+' "deploy/$APP_ENV.env")
+          az containerapp update \
+            --name "ca-dti-rag-$APP_ENV" --resource-group "rg-dti-rag-$APP_ENV" \
+            --image "$IMAGE" \
+            --replace-env-vars "${VARS[@]}" "GIT_SHA=$GIT_SHA"
+          FQDN=$(az containerapp show --name "ca-dti-rag-$APP_ENV" --resource-group "rg-dti-rag-$APP_ENV" \
+            --query properties.configuration.ingress.fqdn -o tsv)
+          echo "APP_URL=https://$FQDN" >> "$GITHUB_ENV"
+
+      - name: Get a token for the app (Entra ID authentication, test and prod)
+        if: vars.APP_AUDIENCE != ''
+        run: |
+          TOKEN=$(az account get-access-token --resource "${{ vars.APP_AUDIENCE }}" --query accessToken -o tsv)
+          echo "::add-mask::$TOKEN"
+          echo "APP_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+
+      - name: Smoke test the deployment
+        run: python scripts/smoke_api.py --base-url "$APP_URL" --env "$APP_ENV" ${APP_TOKEN:+--token "$APP_TOKEN"}
+
+      - name: Promotion gate - the eval bank through the DEPLOYED API
+        if: inputs.promotion_gate
+        run: |
+          python -m evaluation.run_eval --target api --base-url "$APP_URL" \
+            ${APP_TOKEN:+--token "$APP_TOKEN"} \
+            --compare evaluation/baselines/reference-test.json \
+            --out artifacts/eval/promotion
+
+      - name: Evidence for the prod approval
+        if: always() && inputs.promotion_gate
+        run: |
+          {
+            echo "## Promote to prod?"
+            echo "- commit \`${{ inputs.sha }}\`"
+            echo "- image \`${{ inputs.digest }}\`"
+            echo "- test's check_env: passed (this job stops before deploying otherwise)"
+            echo
+            cat artifacts/eval/promotion/scorecard.md 2>/dev/null || echo "**No scorecard: the gate did not complete.**"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always() && inputs.promotion_gate
+        with:
+          name: promotion-scorecard
+          path: artifacts/eval/promotion

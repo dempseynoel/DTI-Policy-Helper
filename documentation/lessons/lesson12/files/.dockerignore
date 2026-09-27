@@ -1,0 +1,8 @@
+# Allowlist: exclude everything, then admit only what the app needs at runtime.
+# The image contains no environment: no deploy/*.env, no .env, no evaluation/, no PDFs.
+# The same image digest is promoted dev -> test -> prod; configuration arrives at runtime.
+*
+!pyproject.toml
+!src/
+!data/fact_matrix/editions_fact_matrix.csv
+**/__pycache__

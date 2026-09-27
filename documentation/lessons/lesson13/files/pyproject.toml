@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dti-rag"
+version = "0.1.0"
+description = "Edition-aware RAG assistant for DavidsTown HomeShield policy wordings"
+requires-python = ">=3.11"
+# Core dependencies: what the production container needs. Keep this list short.
+dependencies = [
+  "azure-identity>=1.19",
+  "azure-search-documents>=11.5",
+  "azure-storage-blob>=12.20",
+  "httpx>=0.27",
+  "openai>=1.60",
+  "opentelemetry-api>=1.25",
+  "pydantic>=2.8",
+  "pydantic-settings>=2.4",
+]
+
+[project.optional-dependencies]
+# The app container installs core + api (Lesson 12) + observability (Lesson 13). Nothing else.
+api = ["fastapi>=0.115", "uvicorn[standard]>=0.30"]
+# Ingestion runs on your laptop and in CI, never in the app container.
+ingest = ["pymupdf>=1.24"]
+# Management-plane reads and scripts run by you and the pipeline, never by the app.
+ops = [
+  "azure-mgmt-appcontainers>=3.0",
+  "azure-mgmt-authorization>=4.0",
+  "azure-mgmt-cognitiveservices>=13.5",
+  "azure-mgmt-keyvault>=10.3",
+  "azure-mgmt-msi>=7.0",
+  "azure-mgmt-resource-locks>=1.0.0b1",
+  "azure-mgmt-search>=9.1",
+  "azure-mgmt-storage>=21.0",
+  "pyyaml>=6.0",
+]
+# Lesson 13: traces to Application Insights. Installed in the app container.
+observability = ["azure-monitor-opentelemetry>=1.8.10"]
+# Lesson 09's framework passes. Evaluated side by side; not in the app container.
+orchestration = [
+  "langgraph>=0.2",
+  "llama-index-core>=0.12",
+  "llama-index-embeddings-azure-openai>=0.3",
+  "llama-index-vector-stores-azureaisearch>=0.3",
+]
+# Lesson 10's LLM-judge metrics. The harness never ships in the container.
+evaluation = ["azure-ai-evaluation>=1.0"]
+dev = [
+  "dti-rag[api,observability,ingest,ops,orchestration,evaluation]",
+  "pre-commit>=3.8",
+  "pytest>=8.3",
+  "ruff>=0.6",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dti_rag"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+markers = ["integration: needs a live Azure environment; run with -m integration and APP_ENV set"]
+addopts = "-m 'not integration'"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

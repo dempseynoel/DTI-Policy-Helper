@@ -1,0 +1,59 @@
+# Nightly, read-only. A failure means something changed in Azure (by hand, usually in the
+# portal) that isn't in deploy/environments.yaml, or an environment wasn't applied.
+# Found in the morning it's a conversation; found at the next prod deploy it's a blocked
+# release.
+#
+# check runs as id-dti-rag-drift (Reader on every resource group, nothing else), in the
+# unprotected `drift` environment, so it never waits for prod's reviewers and can't change
+# anything. sweep runs as the PR-eval identity and removes leaked PR indexes from test.
+name: drift
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    environment: drift
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [dev, test, prod]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[ops]"
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - run: python scripts/check_env.py --env ${{ matrix.env }}
+
+  sweep:
+    runs-on: ubuntu-latest
+    environment: pr-eval
+    env:
+      APP_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e .
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - run: python scripts/sweep_pr_indexes.py --all

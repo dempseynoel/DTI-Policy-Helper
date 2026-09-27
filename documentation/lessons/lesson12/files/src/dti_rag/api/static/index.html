@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DTI Policy Helper</title>
+<style>
+  :root { --ink:#1b1f24; --muted:#5b6470; --line:#d8dde3; --bg:#f6f7f9; --card:#fff;
+          --accent:#1f5fae; --ask:#8a5a00; --ask-bg:#fff6e0; --abstain:#6b2b2b; --abstain-bg:#fbeeee;
+          --blocked:#8b0000; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
+  main { max-width: 820px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 1.25rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: .9rem; }
+  form { display:flex; gap:8px; }
+  textarea { flex:1; min-height:72px; padding:10px; font:inherit; border:1px solid var(--line); border-radius:6px; }
+  button { padding:0 18px; font:inherit; background:var(--accent); color:#fff; border:0; border-radius:6px; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:default; }
+  #status { color:var(--muted); font-size:.9rem; min-height:1.5em; margin:8px 0; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:12px; }
+  .card.ask { background:var(--ask-bg); border-color:var(--ask); }
+  .card.abstain { background:var(--abstain-bg); border-color:var(--abstain); }
+  .badge { display:inline-block; font-size:.75rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; padding:2px 8px; border-radius:99px; margin-bottom:8px; }
+  .badge.answer { background:#e3eefb; color:var(--accent); }
+  .badge.ask { background:var(--ask); color:#fff; }
+  .badge.abstain { background:var(--abstain); color:#fff; }
+  .answer-text { white-space: pre-wrap; margin: 4px 0 12px; }
+  h2 { font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:14px 0 6px; border-top:1px solid var(--line); padding-top:10px; }
+  .edition { font-weight:600; }
+  blockquote { margin:6px 0 10px; padding:6px 10px; border-left:3px solid var(--accent); background:#f3f6fa; }
+  .cite-ref { font-size:.85rem; color:var(--muted); }
+  .guardrail { font-size:.85rem; }
+  .guardrail.blocked { color:var(--blocked); font-weight:600; }
+  .guardrail.flagged { color:var(--ask); }
+  .schedule { margin-top:14px; font-size:.9rem; padding:8px 10px; background:#fffbe6; border:1px solid #efe0a0; border-radius:6px; }
+  footer { color:var(--muted); font-size:.75rem; margin-top:18px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DTI Policy Helper</h1>
+  <p class="sub">Finds what the HomeShield policy wording says, and which edition governs. It
+    doesn't make coverage decisions.</p>
+
+  <form id="ask">
+    <textarea id="q" placeholder="e.g. A kitchen flooded on 15 March 2024 when a dishwasher hose burst. What excess applies?" required></textarea>
+    <button id="go" type="submit">Ask</button>
+  </form>
+  <div id="status" role="status"></div>
+  <div id="out"></div>
+
+  <div class="schedule">⚠ The customer's <strong>schedule</strong> takes priority over the
+    wording. The excess, limits and optional covers that actually apply are the ones on the
+    schedule.</div>
+  <footer id="foot"></footer>
+</main>
+<script>
+const STAGES = { route: "Working out which edition applies…", retrieve: "Searching the wording…",
+                 generate: "Drafting an answer from the wording…", guardrails: "Checking every figure against the wording…" };
+const LABELS = { answer: "Answer", ask: "Question back: which date?", abstain: "Can't answer from the wording" };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const fmt = d => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric", timeZone:"UTC" });
+
+function render(r) {
+  const cites = r.citations.map(c => `
+      <div class="cite-ref">${esc(c.doc_id)} · §${esc(c.section_id)} ${esc(c.section_title)} · p.${c.page} · in force ${fmt(c.effective_from)}–${fmt(c.effective_to)}</div>
+      <blockquote>“${esc(c.quoted_text)}”</blockquote>`).join("");
+  const guard = r.guardrail_status === "passed" ? "Every figure checked against the wording."
+              : r.guardrail_status === "blocked" ? "Withheld: the draft contained a figure not found in the wording."
+              : "Flagged for checking: " + esc(r.guardrail_detail.join("; "));
+  document.getElementById("out").innerHTML = `
+    <div class="card ${esc(r.mode)}">
+      <span class="badge ${esc(r.mode)}">${esc(LABELS[r.mode] || r.mode)}</span>
+      <div class="answer-text">${esc(r.answer)}</div>
+      <h2>Governing edition</h2>
+      <div class="edition">${r.governing_editions.map(esc).join(", ") || "None"}</div>
+      <div>${esc(r.edition_reason)}</div>
+      ${cites ? `<h2>From the wording</h2>${cites}` : ""}
+      <h2>Checks</h2>
+      <div class="guardrail ${esc(r.guardrail_status)}">${guard}</div>
+    </div>`;
+  document.getElementById("foot").textContent = `trace ${r.trace_id} · prompt ${r.prompt_version} · build ${r.git_sha.slice(0, 12)}`;
+}
+
+document.getElementById("ask").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const status = document.getElementById("status"), go = document.getElementById("go");
+  go.disabled = true; document.getElementById("out").innerHTML = ""; status.textContent = "Starting…";
+  try {
+    const res = await fetch("chat/stream", { method: "POST", headers: { "Content-Type": "application/json" },
+                                             body: JSON.stringify({ question: document.getElementById("q").value }) });
+    const reader = res.body.getReader(), decoder = new TextDecoder();
+    let buffer = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let split;
+      while ((split = buffer.indexOf("\n\n")) >= 0) {
+        const block = buffer.slice(0, split); buffer = buffer.slice(split + 2);
+        const name = (block.match(/^event: (.*)$/m) || [])[1];
+        const data = JSON.parse((block.match(/^data: (.*)$/m) || [])[1] || "{}");
+        if (name === "stage") status.textContent = STAGES[data.stage] || data.stage;
+        if (name === "answer") { status.textContent = ""; render(data); }
+        if (name === "error") status.textContent = "Couldn't answer: " + data.detail + (data.trace_id ? ` (trace ${data.trace_id})` : "");
+      }
+    }
+  } catch (err) {
+    status.textContent = "Couldn't reach the service: " + err;
+  } finally {
+    go.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

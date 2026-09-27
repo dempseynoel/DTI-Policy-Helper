@@ -1,0 +1,125 @@
+# What each environment MUST be. The one source of truth for the infrastructure:
+#
+#   infra/ (Terraform) reads this file and builds each environment from it.
+#   scripts/check_env.py (Lesson 13) reads it and compares it with live Azure, using Reader
+#   only, before every deploy and nightly.
+#
+# To change anything: edit this file, `terraform apply` in infra/dev, then infra/test, then
+# infra/prod, and commit. A change isn't finished until every environment has been applied.
+
+subscription_id: "8b4a7bcf-cd21-41f0-aedf-b58029e38750"
+owner: noel
+budget_emails: [noel.dempsey@outlook.com]
+
+# Lesson 13: the GitHub repository ("owner/name") the pipeline identities trust. While it's
+# empty, the identities exist but nothing can sign in as them.
+github_repository: ""
+
+registry:
+  resource_group: rg-dti-rag-shared
+  name: crdtirag
+  # You build and push dev images by hand in Lesson 12. Lesson 13 sets this to false when the
+  # build identity takes over.
+  human_push_allowed: true
+  budget: 20  # monthly, for rg-dti-rag-shared
+
+pipeline_identities:  # in rg-dti-rag-shared; each environment's deploy identity is below
+  build: id-dti-rag-build
+  eval: id-dti-rag-eval
+  drift: id-dti-rag-drift
+
+# ---- Must match in every environment: anything that changes behaviour. ----
+shared:
+  region: uksouth
+  foundry_project: dti-rag
+  foundry_local_auth_disabled: true
+  search_local_auth_disabled: true
+  semantic_ranker: standard
+  storage_shared_key_access: false
+  storage_public_blob_access: false
+  openai_api_version: "2024-10-21"
+  search_api_version: "2024-07-01"
+  deployments:  # name -> what it must serve. Which ones exist is each environment's `capacity`.
+    chat:  {model: gpt-4.1, version: "2025-04-14", sku: GlobalStandard, upgrade: NoAutoUpgrade, content_filter: Microsoft.DefaultV2}
+    embed: {model: text-embedding-3-large, version: "1", sku: Standard, upgrade: NoAutoUpgrade, content_filter: Microsoft.DefaultV2}
+    # Lesson 10: choose the judge here, then add `judge` to dev's and test's capacity.
+    judge: {model: "<judge-model>", version: "<judge-version>", sku: GlobalStandard, upgrade: NoAutoUpgrade, content_filter: Microsoft.DefaultV2}
+
+# ---- May differ: capacity, access and protection only. ----
+environments:
+  dev:
+    resource_group: rg-dti-rag-dev
+    foundry: ai-dti-rag-dev
+    search: srch-dti-rag-dev
+    storage: stdtiragdev
+    key_vault: kv-dtirag-dev
+    container_app: ca-dti-rag-dev
+    app_identity: id-dti-rag-app-dev
+    deploy_identity: id-dti-rag-deploy-dev
+    capacity: {chat: 20, embed: 50}  # thousands of TPM; judge: 20 from Lesson 10
+    search_replicas: 1
+    purge_protection: false
+    delete_lock: false
+    app_replicas: {min: 0, max: 1}
+    human_data_roles_allowed: true
+    # Read by Terraform only (check_env ignores them):
+    app_image: null  # Lesson 12: the image the Container App is created with (see below)
+    pr_eval: false
+    storage_replication: LRS
+    key_vault_soft_delete_days: 7
+    log_retention_days: 30
+    audit_retention_days: 30
+    trace_sampling_ratio: 1.0
+    budget: 100  # monthly; one Search unit alone is ~US$74
+
+  test:
+    resource_group: rg-dti-rag-test
+    foundry: ai-dti-rag-test
+    search: srch-dti-rag-test
+    storage: stdtiragtest
+    key_vault: kv-dtirag-test
+    container_app: ca-dti-rag-test
+    app_identity: id-dti-rag-app-test
+    deploy_identity: id-dti-rag-deploy-test
+    capacity: {chat: 50, embed: 50}  # size chat so a full eval run finishes in minutes; judge from Lesson 10
+    search_replicas: 1
+    purge_protection: false
+    delete_lock: false
+    app_replicas: {min: 0, max: 2}
+    human_data_roles_allowed: false
+    app_image: null  # Lesson 13
+    pr_eval: true  # the PR gate builds throwaway indexes on test's Search
+    storage_replication: LRS
+    key_vault_soft_delete_days: 7
+    log_retention_days: 30
+    audit_retention_days: 30
+    trace_sampling_ratio: 1.0
+    budget: 100
+
+  prod:
+    resource_group: rg-dti-rag-prod
+    foundry: ai-dti-rag-prod
+    search: srch-dti-rag-prod
+    storage: stdtiragprod
+    key_vault: kv-dtirag-prod
+    container_app: ca-dti-rag-prod
+    app_identity: id-dti-rag-app-prod
+    deploy_identity: id-dti-rag-deploy-prod
+    capacity: {chat: 50, embed: 50}  # no judge in prod, ever: check_env treats one as drift
+    search_replicas: 2  # read SLA
+    purge_protection: true  # irreversible
+    delete_lock: true
+    app_replicas: {min: 1, max: 3}
+    human_data_roles_allowed: false
+    app_image: null  # Lesson 13
+    pr_eval: false
+    storage_replication: LRS  # or ZRS; changing it later may replace the account
+    key_vault_soft_delete_days: 90
+    log_retention_days: 30  # placeholder: Lesson 13's complaint-handling decision
+    audit_retention_days: 30  # placeholder: Lesson 13's complaint-handling decision
+    trace_sampling_ratio: 0.2  # a cost setting, so it may differ
+    budget: 250
+
+# app_image: the Container App is created only once this is set, with this image, because
+# there's nothing to run until Lesson 12 builds one. After that the pipeline deploys new images
+# and Terraform ignores the image. Never set it back to null: that deletes the app.

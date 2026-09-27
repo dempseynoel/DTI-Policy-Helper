@@ -1,0 +1,97 @@
+# Build once, promote the same artefacts dev -> test -> prod.
+#
+#   build   image built once, pushed, digest recorded; chunks.jsonl built once
+#   dev     check_env · load index · deploy digest · smoke
+#   test    check_env · load index · deploy digest · smoke · PROMOTION GATE (eval via the API)
+#   prod    (you approve, with the evidence on screen) check_env · load index · deploy · smoke
+#
+# Rollback: run this workflow manually with `ref` = the last good commit on main.
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Commit SHA on main to (re)deploy. Empty = the branch head."
+        required: false
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.ids.outputs.sha }}
+      digest: ${{ steps.image.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+      - id: ids
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      # id-dti-rag-build: federated with Branch -> main; on the shared registry only, AcrPush +
+      # Container Registry Tasks Contributor (az acr build runs an ACR Task that pushes).
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.BUILD_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - id: image
+        name: Build the image once (skipped if this commit's image already exists)
+        env:
+          SHA: ${{ steps.ids.outputs.sha }}
+          ACR: ${{ vars.ACR_NAME }}
+        run: |
+          if ! az acr repository show -n "$ACR" --image "dti-rag:$SHA" > /dev/null 2>&1; then
+            az acr build --registry "$ACR" --image "dti-rag:$SHA" --build-arg GIT_SHA="$SHA" .
+          fi
+          DIGEST=$(az acr repository show -n "$ACR" --image "dti-rag:$SHA" --query digest -o tsv)
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+          echo "Image dti-rag@$DIGEST (commit $SHA)" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[ingest]"
+      - name: Build chunks.jsonl once
+        run: python -m dti_rag.ingestion
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chunks
+          path: artifacts/chunks.*
+
+  dev:
+    needs: build
+    uses: ./.github/workflows/_deploy-env.yml
+    with:
+      env: dev
+      sha: ${{ needs.build.outputs.sha }}
+      digest: ${{ needs.build.outputs.digest }}
+
+  test:
+    needs: [build, dev]
+    uses: ./.github/workflows/_deploy-env.yml
+    with:
+      env: test
+      sha: ${{ needs.build.outputs.sha }}
+      digest: ${{ needs.build.outputs.digest }}
+      promotion_gate: true
+
+  prod:
+    needs: [build, test]
+    uses: ./.github/workflows/_deploy-env.yml
+    with:
+      env: prod
+      sha: ${{ needs.build.outputs.sha }}
+      digest: ${{ needs.build.outputs.digest }}

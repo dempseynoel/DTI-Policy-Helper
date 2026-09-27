@@ -1,0 +1,22 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+
+# Regenerable pipeline output (chunks, eval runs, scorecards).
+# The two committed exceptions live under evaluation/baselines/, not here.
+artifacts/
+
+# Personal overrides. deploy/<env>.env is committed; .env never is.
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
