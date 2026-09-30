@@ -1,7 +1,6 @@
 # Lesson 08 — Grounded generation: citations, multi-hop, cross-references
 
-**Objective:** turn correct retrieval into correct, cited, honest answers, including the
-cases where good retrieval still produces wrong answers.
+**Objective:** turn correct retrieval into correct, cited, honest answers, including the cases where good retrieval still produces wrong answers.
 
 **Deliverables:**
 
@@ -14,8 +13,7 @@ cases where good retrieval still produces wrong answers.
 
 ## The premise shift
 
-Lessons 05–07 were about getting the right text. This lesson assumes you have it and asks
-what still goes wrong. Quite a lot:
+Lessons 05–07 were about getting the right text. This lesson assumes you have it and asks what still goes wrong. Quite a lot:
 
 - the model does arithmetic by mixing facts from two editions;
 - it stops at the first relevant-looking chunk instead of following a cross-reference;
@@ -23,17 +21,13 @@ what still goes wrong. Quite a lot:
 - it quotes £350 when the retrieved text says £300;
 - it asserts cover for a Reserved section because something else said so.
 
-Prompts handle some of this. **The rest needs structural fixes in code**, and this lesson is
-mostly about those.
+Prompts handle some of this. **The rest needs structural fixes in code**, and this lesson is mostly about those.
 
 ---
 
 ## Prompts: versioned, one per mode (`prompts.py`)
 
-`SYSTEM_ANSWER`, `SYSTEM_ASK` and `SYSTEM_ABSTAIN` (and, in Lesson 09, `SYSTEM_COMPARE`)
-share one rule set, and `PROMPT_VERSION` is recorded with every answer. A prompt change is a
-deploy, and the scorecard needs to know which prompt produced which score. One prompt with
-branching instructions is harder to test than three.
+`SYSTEM_ANSWER`, `SYSTEM_ASK` and `SYSTEM_ABSTAIN` (and, in Lesson 09, `SYSTEM_COMPARE`) share one rule set, and `PROMPT_VERSION` is recorded with every answer. A prompt change is a deploy, and the scorecard needs to know which prompt produced which score. One prompt with branching instructions is harder to test than three.
 
 The rules, and why:
 
@@ -67,58 +61,32 @@ That header is what makes per-figure citation possible.
 
 ### Structured output, validated citations
 
-Every generation call returns `GeneratedAnswer {answer, citations[{doc_id, section_id,
-quote}], calculations[{expression, result}]}` through strict structured outputs. Then
-`validate_citations()` **drops any citation whose (doc_id, section_id) wasn't retrieved, or
-whose quote isn't in that clause**, and records a warning. A plausible-looking citation to a
-section that wasn't retrieved is a fabricated citation, which is exactly the failure that
-gets financial-services teams in trouble.
+Every generation call returns `GeneratedAnswer {answer, citations[{doc_id, section_id, quote}], calculations[{expression, result}]}` through strict structured outputs. Then `validate_citations()` **drops any citation whose (doc_id, section_id) wasn't retrieved, or whose quote isn't in that clause**, and records a warning. A plausible-looking citation to a section that wasn't retrieved is a fabricated citation, which is exactly the failure that gets financial-services teams in trouble.
 
-Citations are structured because four consumers need them: the `edition_correct` evaluator
-(10), the figure guardrail (11), the UI (12) and the audit log (13). Prose citations would
-mean regex-parsing your own output in four places.
+Citations are structured because four consumers need them: the `edition_correct` evaluator (10), the figure guardrail (11), the UI (12) and the audit log (13). Prose citations would mean regex-parsing your own output in four places.
 
 ### One generation pass per edition (DTI-015)
 
-*"Two items of storm damage 80 hours apart. How many excesses in 2024, and in 2025?"*
-2024's window is 72 hours, so it's two claims and 2 × £300; 2025's is 96 hours, so one
-claim and £350.
+*"Two items of storm damage 80 hours apart. How many excesses in 2024, and in 2025?"* 2024's window is 72 hours, so it's two claims and 2 × £300; 2025's is 96 hours, so one claim and £350.
 
-The classic failure is **cross-edition contamination**: applying 2025's 96-hour window to
-2024's £300. Both facts are in context, both are correct, and the combination is wrong. So
-when the route has several editions and isn't `ask`, `generate()` runs **one pass per
-edition, each seeing only that edition's chunks**, then a combine pass that may not add
-figures or do arithmetic across editions. Contamination becomes impossible rather than
-discouraged. `test_each_edition_is_generated_from_its_own_chunks_only` proves it.
+The classic failure is **cross-edition contamination**: applying 2025's 96-hour window to 2024's £300. Both facts are in context, both are correct, and the combination is wrong. So when the route has several editions and isn't `ask`, `generate()` runs **one pass per edition, each seeing only that edition's chunks**, then a combine pass that may not add figures or do arithmetic across editions. Contamination becomes impossible rather than discouraged. `test_each_edition_is_generated_from_its_own_chunks_only` proves it.
 
-`ask` mode is the exception: it must present both editions side by side, so it sees both,
-and its prompt forbids giving a single value.
+`ask` mode is the exception: it must present both editions side by side, so it sees both, and its prompt forbids giving a single value.
 
 ### Arithmetic shown as working, checked by code (DTI-016)
 
-*"Current wording; wet-room leak; £4,000 damage; £1,200 trace and access. What's paid?"*
-£1,200 is within the £10,000 trace limit, so the gross is £5,200. The leak is from a wet
-room, so the £600 excess applies, not £350: **£4,600**. The expected wrong answer is £4,850.
+*"Current wording; wet-room leak; £4,000 damage; £1,200 trace and access. What's paid?"* £1,200 is within the £10,000 trace limit, so the gross is £5,200. The leak is from a wet room, so the £600 excess applies, not £350: **£4,600**. The expected wrong answer is £4,850.
 
-The model lists `{"expression": "£4,000 + £1,200 - £600", "result": "£4,600"}`, and
-`arithmetic.verify()` evaluates it: `+ - × ÷` and brackets over plain numbers, parsed with
-`ast`, never `eval()`. Lesson 11's guardrail then allows the computed £4,600 **only** because
-code checked the sum and every operand is sourced.
+The model lists `{"expression": "£4,000 + £1,200 - £600", "result": "£4,600"}`, and `arithmetic.verify()` evaluates it: `+ - × ÷` and brackets over plain numbers, parsed with `ast`, never `eval()`. Lesson 11's guardrail then allows the computed £4,600 **only** because code checked the sum and every operand is sourced.
 
 ### Cross-reference following (DTI-018, DTI-019)
 
 **The top-ranked chunk is often a signpost, not the answer.**
 
-- DTI-018: "ceiling collapsed because a loft pipe burst". 7.2 is the strongest hit for
-  "ceiling", and 7.2 says *"…the claim is assessed under **Section 3** instead"*. So the
-  answer is Section 3, £350, not the £200 accidental-damage excess.
+- DTI-018: "ceiling collapsed because a loft pipe burst". 7.2 is the strongest hit for "ceiling", and 7.2 says *"…the claim is assessed under **Section 3** instead"*. So the answer is Section 3, £350, not the £200 accidental-damage excess.
 - DTI-019: lightning, power surge, no fire. 5.1 says *"…is covered under **Section 4**."*
 
-`crossref.py` detects **only** phrasing that moves a claim to another section ("is assessed /
-covered / dealt with under Section N"), not passing mentions like "see Section 9.3". The
-pipeline then runs a follow-up retrieval with **`doc_id` = the same edition AND
-`section_group` = N**. A cross-reference is internal to a document; following it into
-another edition is contamination by the back door.
+`crossref.py` detects **only** phrasing that moves a claim to another section ("is assessed / covered / dealt with under Section N"), not passing mentions like "see Section 9.3". The pipeline then runs a follow-up retrieval with **`doc_id` = the same edition AND `section_group` = N**. A cross-reference is internal to a document; following it into another edition is contamination by the back door.
 
 | Approach | Pros | Cons |
 |---|---|---|
@@ -126,14 +94,11 @@ another edition is contamination by the back door.
 | Ask the LLM whether to follow up | Any phrasing | Non-deterministic, an extra call |
 | Agentic loop | Most general | Hardest to audit |
 
-The wording is a drafted legal document with formulaic phrasing, so a narrow pattern has high
-precision.
+The wording is a drafted legal document with formulaic phrasing, so a narrow pattern has high precision.
 
 ### Abstention generation
 
-`abstain` gets its own prompt and its own quality bar: say plainly what can't be answered and
-why; cite the nearest relevant clause; say what would be needed; **give no figure**. When
-there's nothing to cite (no edition in force), no model is called at all.
+`abstain` gets its own prompt and its own quality bar: say plainly what can't be answered and why; cite the nearest relevant clause; say what would be needed; **give no figure**. When there's nothing to cite (no edition in force), no model is called at all.
 
 ---
 
@@ -144,9 +109,7 @@ def answer(question) -> PipelineResult:
     route → retrieve per edition (+ same-edition follow-ups) → group by edition → generate
 ```
 
-It returns the `Answer` plus the route and every `RetrievalResult` (with the OData sent). The
-API, the eval harness and `scripts/ask.py` all call it. Lessons 09, 11 and 13 extend it; they
-never bypass it.
+It returns the `Answer` plus the route and every `RetrievalResult` (with the OData sent). The API, the eval harness and `scripts/ask.py` all call it. Lessons 09, 11 and 13 extend it; they never bypass it.
 
 ```bash
 documentation/lessons/apply_lesson.sh 08
@@ -159,14 +122,9 @@ make test-integration ENV=dev
 
 ## Environments
 
-**Prompts are code, promoted like code.** They ship in the image, and the same image goes
-dev → test → prod. Nobody edits a prompt in a running environment; if you ever move prompts
-out of the image, version and promote them like an image digest.
+**Prompts are code, promoted like code.** They ship in the image, and the same image goes dev → test → prod. Nobody edits a prompt in a running environment; if you ever move prompts out of the image, version and promote them like an image digest.
 
-**The content filter on `chat` is behavioural, so it must match everywhere.** Fire, theft and
-injury wording is exactly what a filter can react to; a stricter filter in prod can block an
-answer that passed in test. It's in the `shared` section of `deploy/environments.yaml`, so
-Terraform applies the same filter everywhere, and Lesson 13's `check_env` verifies it.
+**The content filter on `chat` is behavioural, so it must match everywhere.** Fire, theft and injury wording is exactly what a filter can react to; a stricter filter in prod can block an answer that passed in test. It's in the `shared` section of `deploy/environments.yaml`, so Terraform applies the same filter everywhere, and Lesson 13's `check_env` verifies it.
 
 ---
 
@@ -281,7 +239,8 @@ DTI-Policy-Helper/
 ├── .pre-commit-config.yaml
 ├── pyproject.toml
 ├── .python-version
-└── README.md
+├── README.md
+└── uv.lock  ◇ generated
 ```
 
 `★ new` in this lesson · `✎ changed` in this lesson · `◇ generated` by running the code (git-ignored or produced by you) · unmarked: unchanged from earlier lessons

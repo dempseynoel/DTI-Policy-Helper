@@ -1,6 +1,6 @@
 """Add the Lesson 06 upgrades one at a time and measure what each bought.
 
-    APP_ENV=dev python scripts/measure_retrieval.py
+    APP_ENV=dev uv run python scripts/measure_retrieval.py
 
 Filters are passed BY HAND here, from the QA bank's query_date and a few hand-written
 edition choices. Choosing filters automatically is Lesson 07's router; until then, this is

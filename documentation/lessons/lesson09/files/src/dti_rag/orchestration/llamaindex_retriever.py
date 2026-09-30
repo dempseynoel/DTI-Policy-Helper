@@ -1,6 +1,6 @@
 """The retrieval layer rebuilt in LlamaIndex, over the EXISTING index. Plus the probes.
 
-    APP_ENV=dev python -m dti_rag.orchestration.llamaindex_retriever
+    APP_ENV=dev uv run python -m dti_rag.orchestration.llamaindex_retriever
 
 Each probe answers a FRAMEWORKS.md question with evidence rather than impressions:
 

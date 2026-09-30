@@ -1,6 +1,6 @@
 """The Lesson 04 demonstration: the same vector query, unfiltered and filtered.
 
-    APP_ENV=dev python scripts/compare_filters.py
+    APP_ENV=dev uv run python scripts/compare_filters.py
 
 Look at the unfiltered scores. Five near-identical 3.4 clauses separated in the third
 decimal place: the ranking between editions is noise, and no reranker fixes noise.

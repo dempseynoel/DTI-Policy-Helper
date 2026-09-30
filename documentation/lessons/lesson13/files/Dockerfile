@@ -15,7 +15,7 @@ WORKDIR /app
 # (--locked fails the build if it's out of date), and only the core dependencies and the
 # runtime extras: no dev group, no ingestion, evaluation or frameworks.
 COPY pyproject.toml uv.lock ./
-RUN uv sync --locked --no-dev --no-install-project --extra api
+RUN uv sync --locked --no-dev --no-install-project --extra api --extra observability
 
 COPY data/fact_matrix/editions_fact_matrix.csv data/fact_matrix/editions_fact_matrix.csv
 COPY src/ src/

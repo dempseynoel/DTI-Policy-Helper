@@ -103,7 +103,7 @@ evaluators (Lesson 10).
 
 ## 3. Corpus map
 
-Generated: see [`corpus_map.md`](corpus_map.md) (`python scripts/build_corpus_map.py`).
+Generated: see [`corpus_map.md`](corpus_map.md) (`uv run python scripts/build_corpus_map.py`).
 
 The ranges are contiguous and non-overlapping, so a loss date maps to exactly one edition.
 **30 June / 1 July 2023** is the only mid-year boundary, and the reason a year filter isn't

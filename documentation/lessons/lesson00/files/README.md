@@ -1,9 +1,6 @@
 # DTI Policy Helper
 
-An edition-aware retrieval-augmented assistant for DavidsTown Insurance (DTI) claims
-handlers. It answers questions about the HomeShield home-insurance policy wording, picks the
-edition that governs a claim from the loss date, cites the clause it relied on, and declines
-when the wording can't answer.
+An edition-aware retrieval-augmented assistant for DavidsTown Insurance (DTI) claims handlers. It answers questions about the HomeShield home-insurance policy wording, picks the edition that governs a claim from the loss date, cites the clause it relied on, and declines when the wording can't answer.
 
 It is built lesson by lesson from `documentation/lessons/`.
 
@@ -26,9 +23,6 @@ It is built lesson by lesson from `documentation/lessons/`.
 
 ## Environments
 
-dev, test and prod, one Azure resource group each, built by Terraform (`infra/`) from
-`deploy/environments.yaml`. Each apply writes the environment's configuration to
-`deploy/<env>.env`, which is committed. Application code is promoted dev → test → prod by
-GitHub Actions, gated by the eval harness.
+dev, test and prod, one Azure resource group each, built by Terraform (`infra/`) from `deploy/environments.yaml`. Each apply writes the environment's configuration to `deploy/<env>.env`, which is committed. Application code is promoted dev → test → prod by GitHub Actions, gated by the eval harness.
 
 **Infrastructure is code, configuration is generated, code is promoted.**

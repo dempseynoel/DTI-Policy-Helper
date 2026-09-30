@@ -1,8 +1,8 @@
 """Lesson 04, loading path 2: let Azure AI Search chunk and embed the PDFs itself.
 
-    APP_ENV=dev python scripts/experiments/integrated_vectorization.py            # build + run
-    APP_ENV=dev python scripts/experiments/integrated_vectorization.py --status   # progress
-    APP_ENV=dev python scripts/experiments/integrated_vectorization.py --delete   # clean up
+    APP_ENV=dev uv run python scripts/experiments/integrated_vectorization.py          # build + run
+    APP_ENV=dev uv run python scripts/experiments/integrated_vectorization.py --status # progress
+    APP_ENV=dev uv run python scripts/experiments/integrated_vectorization.py --delete # clean up
 
 A dev-only experiment: it refuses to run anywhere else, and --delete removes every object it
 created, so nothing is left for test and prod to drift from. The indexer and embedding skill

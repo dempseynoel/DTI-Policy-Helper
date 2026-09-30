@@ -1,32 +1,23 @@
 # Lesson 07 — The query-understanding layer: dates, freshness, ambiguity, abstention
 
-**Objective:** decide *which editions are in scope and what mode to answer in* before
-retrieving, with the decision made in deterministic, testable code.
+**Objective:** decide *which editions are in scope and what mode to answer in* before retrieving, with the decision made in deterministic, testable code.
 
 **Deliverables:**
 
 - `src/dti_rag/query/editions.py`: the edition registry; `resolve_by_date` and friends
 - `src/dti_rag/query/extract.py`: LLM extraction of facts (never decisions)
 - `src/dti_rag/query/router.py`: `route(question) → Route(mode, editions, reason, notes)`
-- `tests/unit/test_editions.py`, `tests/unit/test_router.py` (offline) and
-  `tests/integration/test_router_llm.py` (live)
+- `tests/unit/test_editions.py`, `tests/unit/test_router.py` (offline) and `tests/integration/test_router_llm.py` (live)
 
 ---
 
 ## Why routing is the highest-leverage layer
 
-Lesson 06 gave you a retriever that returns exactly the right chunks, **if** you hand it the
-right filter. Hand it the wrong one and it returns perfectly retrieved, perfectly ranked,
-**wrong-edition** results, confidently and without error. Everything downstream then works
-correctly on the wrong premise.
+Lesson 06 gave you a retriever that returns exactly the right chunks, **if** you hand it the right filter. Hand it the wrong one and it returns perfectly retrieved, perfectly ranked, **wrong-edition** results, confidently and without error. Everything downstream then works correctly on the wrong premise.
 
-> **Filters only help if you set them correctly.** The router is where correctness is
-> decided; everything after it is execution.
+> **Filters only help if you set them correctly.** The router is where correctness is decided; everything after it is execution.
 
-The router's second job is what separates this from a demo: **deciding whether to answer at
-all.** Some questions need a question back; some need a refusal. Making that a first-class
-decision, rather than hoping the generator hedges, is what makes it safe for a claims
-handler.
+The router's second job is what separates this from a demo: **deciding whether to answer at all.** Some questions need a question back; some need a refusal. Making that a first-class decision, rather than hoping the generator hedges, is what makes it safe for a claims handler.
 
 ---
 
@@ -38,8 +29,7 @@ handler.
 | `ask` | A bare year with two editions (2023) | Each edition's value with its dates, then a request for the loss date |
 | `abstain` | Out of corpus, out of scope, or no edition in force | Why, plus the nearest relevant clause |
 
-Explicit modes make behaviour measurable (Lesson 10): `ambiguous` items must `ask`,
-`answerable: false` items must `abstain`, and answerable items must *not* abstain.
+Explicit modes make behaviour measurable (Lesson 10): `ambiguous` items must `ask`, `answerable: false` items must `abstain`, and answerable items must *not* abstain.
 
 ---
 
@@ -54,16 +44,11 @@ Explicit modes make behaviour measurable (Lesson 10): `ambiguous` items must `as
     "does it cover my car?"      ──►  scope="other_insurance"      decide() ──► Route
 ```
 
-**LLM structured output handles extraction** (`extract.py`). Natural language is unbounded;
-you can't regex every phrasing of a date.
+**LLM structured output handles extraction** (`extract.py`). Natural language is unbounded; you can't regex every phrasing of a date.
 
-**Pure code handles resolution** (`editions.py`, `router.decide()`). Which edition governs a
-date has exactly one right answer, must be identical every time, and must be testable
-offline. Ask a model "which edition covers 15 March 2024?" and it's usually right, and
-occasionally, untestably, wrong.
+**Pure code handles resolution** (`editions.py`, `router.decide()`). Which edition governs a date has exactly one right answer, must be identical every time, and must be testable offline. Ask a model "which edition covers 15 March 2024?" and it's usually right, and occasionally, untestably, wrong.
 
-> **Use the LLM to turn language into structure. Use code to turn structure into decisions.**
-> The moment a decision has exactly one defensible answer, it belongs in code.
+> **Use the LLM to turn language into structure. Use code to turn structure into decisions.** The moment a decision has exactly one defensible answer, it belongs in code.
 
 ### The extraction schema (`extract.py`)
 
@@ -77,28 +62,19 @@ occasionally, untestably, wrong.
 
 Design notes:
 
-- **Every field may be empty, and empty is the safe default.** A spurious extraction (a
-  filter matching nothing, a false abstention) costs more than a missed one, which falls
-  through to the freshness default.
-- **Never ask the model for the filter, the edition, or "is this ambiguous?".** Ask for facts;
-  derive decisions in code.
-- **Strict structured outputs** (`chat.completions.parse` with a Pydantic model). No field
-  has a default value, because strict mode requires every field; `Extraction.empty()` is the
-  explicit fallback.
-- The question is wrapped in `<question>` tags and declared to be data. That's the first of
-  the injection defences (Lesson 11).
+- **Every field may be empty, and empty is the safe default.** A spurious extraction (a filter matching nothing, a false abstention) costs more than a missed one, which falls through to the freshness default.
+- **Never ask the model for the filter, the edition, or "is this ambiguous?".** Ask for facts; derive decisions in code.
+- **Strict structured outputs** (`chat.completions.parse` with a Pydantic model). No field has a default value, because strict mode requires every field; `Extraction.empty()` is the explicit fallback.
+- The question is wrapped in `<question>` tags and declared to be data. That's the first of the injection defences (Lesson 11).
 
 ### The edition registry (`editions.py`)
 
-Pure functions over the **edition columns** of the fact matrix (doc_id, year, version,
-status, dates). Those columns are verified against every PDF's control page by a Lesson 03
-test. The fact columns, where the DTI-014 trap lives, are never read.
+Pure functions over the **edition columns** of the fact matrix (doc_id, year, version, status, dates). Those columns are verified against every PDF's control page by a Lesson 03 test. The fact columns, where the DTI-014 trap lives, are never read.
 
 - `resolve_by_date(d)` → exactly one edition, or `NoEditionInForce`
 - `resolve_by_year(y)` → a list (2023 returns two); `resolve_version(y, v)`
 - `by_doc_id`, `superseding` (2022 supersedes the 2021 edition), `current()`
-- On load, it **validates** that ranges are contiguous and non-overlapping, and that exactly
-  one edition is CURRENT. The property the whole design rests on is checked, not assumed.
+- On load, it **validates** that ranges are contiguous and non-overlapping, and that exactly one edition is CURRENT. The property the whole design rests on is checked, not assumed.
 
 ---
 
@@ -106,45 +82,23 @@ test. The fact columns, where the DTI-014 trap lives, are never read.
 
 In order (`router.py`):
 
-1. **Out of scope** (`scope != home_policy`) → `abstain`, with the current edition in scope
-   so generation can cite the nearest clause (DTI-025 wants 6.5 cited).
-2. **A document named but not held** → `abstain`, with the edition that supersedes it in
-   scope (DTI-024 → 2022's control page). **A set-membership check, no LLM judgement**: the
-   scariest failure in the corpus is caught deterministically. `route()` also regex-scans the
-   question for document references, so this doesn't depend on the model noticing them.
-   A named *year* that isn't held (2021) → `abstain` too.
-3. **A loss date** → the edition in force → `answer`. The reason says why: *"The loss date (15
-   March 2024) falls within 2024 edition v1.0, in force 1 January 2024 to 31 December 2024."*
-   **A date outside every edition** (e.g. 2026: the current edition expired on 31 December
+1. **Out of scope** (`scope != home_policy`) → `abstain`, with the current edition in scope so generation can cite the nearest clause (DTI-025 wants 6.5 cited).
+2. **A document named but not held** → `abstain`, with the edition that supersedes it in scope (DTI-024 → 2022's control page). **A set-membership check, no LLM judgement**: the scariest failure in the corpus is caught deterministically. `route()` also regex-scans the question for document references, so this doesn't depend on the model noticing them. A named *year* that isn't held (2021) → `abstain` too.
+3. **A loss date** → the edition in force → `answer`. The reason says why: *"The loss date (15 March 2024) falls within 2024 edition v1.0, in force 1 January 2024 to 31 December 2024."* **A date outside every edition** (e.g. 2026: the current edition expired on 31 December
    2025) → `abstain`, not a silent fallback to "current".
-4. **Named editions** → those editions. A bare year with two editions → `ask`, with both
-   ranges in the reason (DTI-008, DTI-009). Several named editions (DTI-015's 2024 and 2025;
-   DTI-017's "second 2023" and 2024) → `answer`, one pass per edition.
-5. **`existence_or_history` or `comparison`, with nothing named** → every held edition
-   (DTI-012, 013, 014, 023).
-6. **Nothing temporal** → the current edition, `answer`, **plus a note for generation**:
-   "state that earlier editions may differ". The caveat is part of the correct answer
-   (DTI-010's `expected_behaviour` says so).
+4. **Named editions** → those editions. A bare year with two editions → `ask`, with both ranges in the reason (DTI-008, DTI-009). Several named editions (DTI-015's 2024 and 2025; DTI-017's "second 2023" and 2024) → `answer`, one pass per edition.
+5. **`existence_or_history` or `comparison`, with nothing named** → every held edition (DTI-012, 013, 014, 023).
+6. **Nothing temporal** → the current edition, `answer`, **plus a note for generation**: "state that earlier editions may differ". The caveat is part of the correct answer (DTI-010's `expected_behaviour` says so).
 
-`Route.filters()` returns **one `doc_id` filter per edition**. The router resolves the date in
-code and hands `retrieve()` an exact edition, so retrieval for different editions never
-mixes. The date-range filter from Lesson 06 remains in the integration tests as a cross-check
-that the index and the registry agree.
+`Route.filters()` returns **one `doc_id` filter per edition**. The router resolves the date in code and hands `retrieve()` an exact edition, so retrieval for different editions never mixes. The date-range filter from Lesson 06 remains in the integration tests as a cross-check that the index and the registry agree.
 
 ### The subtlety: two editions in scope isn't always ambiguous
 
-For DTI-006 (burglary discovered 3 May 2023), the date resolves to exactly one edition, so
-it's not ambiguous even though 2023 has two. And where both editions are in scope, if they
-*agree* (police notification is 24 hours in both 2023 editions), there's nothing to ask.
+For DTI-006 (burglary discovered 3 May 2023), the date resolves to exactly one edition, so it's not ambiguous even though 2023 has two. And where both editions are in scope, if they *agree* (police notification is 24 hours in both 2023 editions), there's nothing to ask.
 
-So ambiguity is properly: **several editions in scope AND they disagree on the fact asked
-about.** Disagreement can only be known after retrieval, so the router raises a conservative
-`ask`, and Lesson 09 adds the post-retrieval check that downgrades it when the editions word
-the clause identically. `is_ambiguous()` is the pre-retrieval half.
+So ambiguity is properly: **several editions in scope AND they disagree on the fact asked about.** Disagreement can only be known after retrieval, so the router raises a conservative `ask`, and Lesson 09 adds the post-retrieval check that downgrades it when the editions word the clause identically. `is_ambiguous()` is the pre-retrieval half.
 
-**Don't over-abstain.** Lesson 10 scores both directions: a router that abstains whenever
-it's unsure passes DTI-024/025 and fails half the bank. `test_a_plain_lookup_does_not_over_abstain`
-exists for a reason.
+**Don't over-abstain.** Lesson 10 scores both directions: a router that abstains whenever it's unsure passes DTI-024/025 and fails half the bank. `test_a_plain_lookup_does_not_over_abstain` exists for a reason.
 
 ---
 
@@ -160,14 +114,9 @@ make test-integration ENV=dev       # the LLM half against your `chat` deploymen
 
 ## Environments
 
-`query/` never reads `APP_ENV`. If you catch yourself wanting it there, something that should
-be data has become behaviour.
+`query/` never reads `APP_ENV`. If you catch yourself wanting it there, something that should be data has become behaviour.
 
-What *does* vary is the model behind extraction. **Structured-output behaviour is a property
-of the model version**: a new version can extract "3 May 2023" differently, or start filling
-a field it used to leave empty. So **a model upgrade is a router change**: it goes dev → test
-→ prod behind the eval gate, like code. The integration tests run in test against the version
-prod uses.
+What *does* vary is the model behind extraction. **Structured-output behaviour is a property of the model version**: a new version can extract "3 May 2023" differently, or start filling a field it used to leave empty. So **a model upgrade is a router change**: it goes dev → test → prod behind the eval gate, like code. The integration tests run in test against the version prod uses.
 
 ---
 
@@ -268,7 +217,8 @@ DTI-Policy-Helper/
 ├── .pre-commit-config.yaml
 ├── pyproject.toml
 ├── .python-version
-└── README.md
+├── README.md
+└── uv.lock  ◇ generated
 ```
 
 `★ new` in this lesson · `✎ changed` in this lesson · `◇ generated` by running the code (git-ignored or produced by you) · unmarked: unchanged from earlier lessons
@@ -304,8 +254,7 @@ DTI-Policy-Helper/
 2. Two editions are in scope. Is that ambiguous? What else do you need to know?
 3. How does the router catch DTI-024 without LLM judgement?
 4. Why is a flat refusal the wrong answer to DTI-025?
-5. What's the cost asymmetry between a spurious extraction and a missed one, and how does it
-   shape the schema?
+5. What's the cost asymmetry between a spurious extraction and a missed one, and how does it shape the schema?
 6. Where does untrusted text become typed values, and why does that location matter?
 
 ---

@@ -16,7 +16,8 @@ dependencies = [
   "pydantic-settings>=2.4",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
+# Installed by every `uv sync` and `uv run`; `--no-dev` leaves it out.
 dev = [
   "pre-commit>=3.8",
   "pytest>=8.3",

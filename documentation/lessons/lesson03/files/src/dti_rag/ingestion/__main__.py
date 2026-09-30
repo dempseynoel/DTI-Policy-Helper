@@ -1,6 +1,6 @@
 """Build artifacts/chunks.jsonl from the policy PDFs.
 
-    python -m dti_rag.ingestion            (or: make chunks)
+    uv run python -m dti_rag.ingestion            (or: make chunks)
 
 Deterministic by construction: files in sorted order, keys sorted, no timestamps. Running it
 twice produces a byte-identical file, and the SHA-256 printed at the end identifies the

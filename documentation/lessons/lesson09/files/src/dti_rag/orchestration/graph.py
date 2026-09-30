@@ -1,6 +1,6 @@
 """The pipeline as a LangGraph graph.
 
-    APP_ENV=dev python -m dti_rag.orchestration.graph "What changed between 2024 and 2025?"
+    APP_ENV=dev uv run python -m dti_rag.orchestration.graph "What changed between 2024 and 2025?"
 
                   ┌───────┐
       START ─────►│ route │

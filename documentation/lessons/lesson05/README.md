@@ -1,13 +1,11 @@
 # Lesson 05 — The naive baseline, and watch it fail on purpose
 
-**Objective:** build the RAG pipeline everyone builds first, run all 25 questions through it,
-and document exactly how and why it fails.
+**Objective:** build the RAG pipeline everyone builds first, run all 25 questions through it, and document exactly how and why it fails.
 
 **Deliverables:**
 
 - `src/dti_rag/retrieval/baseline.py`: embed → vector top-5, **no filters** → stuff → generate
-- `evaluation/`: the first scaffolding of the eval harness (QA bank loader, run rows, checks,
-  run metadata) and `run_baseline.py`
+- `evaluation/`: the first scaffolding of the eval harness (QA bank loader, run rows, checks, run metadata) and `run_baseline.py`
 - `evaluation/baselines/naive-baseline-dev.json` (raw output, **committed**)
 - `documentation/design/baseline_failures.md`: each failure mapped to its mechanism
 
@@ -15,28 +13,21 @@ and document exactly how and why it fails.
 
 ## Why deliberately build something bad
 
-**You need a control group.** "Our RAG system gets 88%" means nothing. "Naive RAG scored X,
-edition-aware retrieval scored Y, and here's where the difference came from, by category" is
-an engineering result. Lesson 10 needs this baseline to say that.
+**You need a control group.** "Our RAG system gets 88%" means nothing. "Naive RAG scored X, edition-aware retrieval scored Y, and here's where the difference came from, by category" is an engineering result. Lesson 10 needs this baseline to say that.
 
-**You need to feel the failure.** Watching your pipeline answer £350 to a £300 question, with
-a fluent, well-cited-looking explanation, is what stops you trusting a demo that looks fine.
+**You need to feel the failure.** Watching your pipeline answer £350 to a £300 question, with a fluent, well-cited-looking explanation, is what stops you trusting a demo that looks fine.
 
-**It's the strongest thing to show a stakeholder.** Same question, same corpus, same model:
-one pipeline says £350 and the other says £300.
+**It's the strongest thing to show a stakeholder.** Same question, same corpus, same model: one pipeline says £350 and the other says £300.
 
 ---
 
 ## Build it thin, and keep it thin
 
-`baseline.py` embeds the question, runs a pure vector search (top 5, no filter), joins the
-chunks into a prompt, and asks `chat` (temperature 0) to "answer using only the context".
+`baseline.py` embeds the question, runs a pure vector search (top 5, no filter), joins the chunks into a prompt, and asks `chat` (temperature 0) to "answer using only the context".
 
-> **This file must never be improved.** Its job is to stay naive so every later comparison
-> is honest. The warning is at the top of the file, for your future self.
+> **This file must never be improved.** Its job is to stay naive so every later comparison is honest. The warning is at the top of the file, for your future self.
 
-Use a *reasonable* naive prompt, though. A deliberately hobbled prompt rigs the comparison
-the other way; "answer only from the context" is what a competent engineer writes on day one.
+Use a *reasonable* naive prompt, though. A deliberately hobbled prompt rigs the comparison the other way; "answer only from the context" is what a competent engineer writes on day one.
 
 ---
 
@@ -56,10 +47,7 @@ Run all 25 (`make baseline ENV=dev`), but these five show the distinct ways it f
 
 ## What to record, and why
 
-`run_baseline.py` records, per question: the answer, the retrieved `(doc_id, section_id,
-score)`, the retrieved text, and the latency. The report it prints adds whether a **gold
-document** and a **gold section** were retrieved, and the `must_include` / `must_not_include`
-results.
+`run_baseline.py` records, per question: the answer, the retrieved `(doc_id, section_id, score)`, the retrieved text, and the latency. The report it prints adds whether a **gold document** and a **gold section** were retrieved, and the `must_include` / `must_not_include` results.
 
 The gold-retrieved column is the diagnostic that matters, because it splits failures in two:
 
@@ -68,21 +56,13 @@ The gold-retrieved column is the diagnostic that matters, because it splits fail
 | No | **Retrieval failure**: the right text never arrived | 06–07 |
 | Yes, but the answer's wrong | **Generation failure**: right text, wrong reasoning | 08 |
 
-Most baseline failures here are the first kind. Knowing that tells you to spend effort on
-retrieval, not prompts; teams that skip this step tune prompts against a retrieval problem
-for weeks.
+Most baseline failures here are the first kind. Knowing that tells you to spend effort on retrieval, not prompts; teams that skip this step tune prompts against a retrieval problem for weeks.
 
-**`must_include` checks are deliberately strict** (`evaluation/checks.py`): case-insensitive,
-whitespace-collapsed, figures exact ("£300" ≠ "300 pounds"), and short words like "not"
-matched as whole words so "note" doesn't count. Lesson 10 builds on this.
+**`must_include` checks are deliberately strict** (`evaluation/checks.py`): case-insensitive, whitespace-collapsed, figures exact ("£300" ≠ "300 pounds"), and short words like "not" matched as whole words so "note" doesn't count. Lesson 10 builds on this.
 
 ### Provenance, recorded with every run
 
-A baseline compared across environments is only honest if both runs used the same models and
-corpus. So the run's metadata (`evaluation/runmeta.py`) records: `app_env`, git SHA, prompt
-version, temperature, **the model and version actually serving each deployment, read from the
-Foundry resource at run time** (not copied from your notes), the index manifest and the
-throttled-response count.
+A baseline compared across environments is only honest if both runs used the same models and corpus. So the run's metadata (`evaluation/runmeta.py`) records: `app_env`, git SHA, prompt version, temperature, **the model and version actually serving each deployment, read from the Foundry resource at run time** (not copied from your notes), the index manifest and the throttled-response count.
 
 ---
 
@@ -93,17 +73,13 @@ documentation/lessons/apply_lesson.sh 05
 make baseline ENV=dev
 ```
 
-Then fill in `documentation/design/baseline_failures.md` from the printed table, and commit
-it **and** `evaluation/baselines/naive-baseline-dev.json`. Lesson 10 re-scores that JSON with
-the full evaluator set, with no need to regenerate.
+Then fill in `documentation/design/baseline_failures.md` from the printed table, and commit it **and** `evaluation/baselines/naive-baseline-dev.json`. Lesson 10 re-scores that JSON with the full evaluator set, with no need to regenerate.
 
 ---
 
 ## Environments
 
-**Run the baseline in dev.** This lesson is the likeliest to produce a runaway loop, and
-dev's TPM cap and budget alert are there to catch it. `baseline.py` reads configuration like
-everything else, with no endpoint in the file, so it runs unchanged anywhere.
+**Run the baseline in dev.** This lesson is the likeliest to produce a runaway loop, and dev's TPM cap and budget alert are there to catch it. `baseline.py` reads configuration like everything else, with no endpoint in the file, so it runs unchanged anywhere.
 
 ---
 
@@ -195,7 +171,8 @@ DTI-Policy-Helper/
 ├── .pre-commit-config.yaml
 ├── pyproject.toml
 ├── .python-version
-└── README.md
+├── README.md
+└── uv.lock  ◇ generated
 ```
 
 `★ new` in this lesson · `✎ changed` in this lesson · `◇ generated` by running the code (git-ignored or produced by you) · unmarked: unchanged from earlier lessons
@@ -216,18 +193,15 @@ DTI-Policy-Helper/
 
 ## Done when
 
-You have documented, reproducible failures, not a vague sense that "it's not great", and for
-every failure you can say whether the right chunk was retrieved.
+You have documented, reproducible failures, not a vague sense that "it's not great", and for every failure you can say whether the right chunk was retrieved.
 
 ## Check yourself
 
 1. Why is returning £600 for DTI-008 a failure when £600 is a real 2023 value?
-2. Which baseline failures are retrieval problems and which are generation problems? How
-   does that change what you build next?
+2. Which baseline failures are retrieval problems and which are generation problems? How does that change what you build next?
 3. Why keep the baseline rather than deleting it once Lesson 06 works?
 4. What does DTI-024 teach about retrieval score vs answer confidence?
-5. The baseline scores DTI-010 ("what is the standard excess?") correct with £350. Is that a
-   pass? *(Careful: read its `expected_behaviour`.)*
+5. The baseline scores DTI-010 ("what is the standard excess?") correct with £350. Is that a pass? *(Careful: read its `expected_behaviour`.)*
 
 ---
 

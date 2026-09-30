@@ -59,11 +59,10 @@ jobs:
           echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
           echo "Image dti-rag@$DIGEST (commit $SHA)" >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v7
         with:
-          python-version: "3.12"
-          cache: pip
-      - run: pip install -e ".[ingest]"
+          activate-environment: true
+      - run: uv sync --locked --no-dev --extra ingest
       - name: Build chunks.jsonl once
         run: python -m dti_rag.ingestion
       - uses: actions/upload-artifact@v4

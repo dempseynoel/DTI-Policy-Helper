@@ -1,8 +1,6 @@
 # Lesson 04 — Build and load the Azure AI Search index
 
-**Objective:** a versioned index with a vector field, filterable metadata and a semantic
-configuration, loaded two ways so you understand both, with a manifest recording exactly
-what it holds.
+**Objective:** a versioned index with a vector field, filterable metadata and a semantic configuration, loaded two ways so you understand both, with a manifest recording exactly what it holds.
 
 **Deliverables:**
 
@@ -26,118 +24,71 @@ what it holds.
 | Rerank semantically | A semantic configuration: `section_title` as title, `content` as content |
 | Cite | `doc_id`, `section_id`, `page` retrievable |
 
-Every one of those is a decision you can't change without rebuilding: Azure AI Search won't
-make an existing field filterable. On this corpus a rebuild takes two minutes; on a real one
-it's an outage. So the index **name is versioned in code**: `dti-policy-v{SCHEMA_VERSION}`.
+Every one of those is a decision you can't change without rebuilding: Azure AI Search won't make an existing field filterable. On this corpus a rebuild takes two minutes; on a real one it's an outage. So the index **name is versioned in code**: `dti-policy-v{SCHEMA_VERSION}`.
 
 ### Decisions worth dwelling on
 
-- **Vector dimensions are immutable.** Truncating `text-embedding-3-large` to 1024 later is a
-  new index. Take the full 3072 now; `constants.EMBED_DIMENSIONS` and the smoke test already
-  assert it.
-- **`DateTimeOffset` needs ISO 8601 with an offset**: `2024-01-01T00:00:00Z`, not
-  `1 January 2024`. `documents.to_offset()` does it, at midnight UTC as `SCHEMA.md` decided.
-- **Semantic ranking needs two things in two places.** The **plan** is a service setting
-  (`semantic_ranker` in `environments.yaml`, applied by Terraform); the **configuration** is
-  in the index, created by the loader. A missing plan
-  fails in one environment only and looks like a code bug.
-- **`metadata_json`** is a retrievable JSON copy of the metadata. LlamaIndex requires such a
-  field (Lesson 09). It's in the schema from the start so Lesson 09 doesn't force a
-  `SCHEMA_VERSION` bump.
+- **Vector dimensions are immutable.** Truncating `text-embedding-3-large` to 1024 later is a new index. Take the full 3072 now; `constants.EMBED_DIMENSIONS` and the smoke test already assert it.
+- **`DateTimeOffset` needs ISO 8601 with an offset**: `2024-01-01T00:00:00Z`, not `1 January 2024`. `documents.to_offset()` does it, at midnight UTC as `SCHEMA.md` decided.
+- **Semantic ranking needs two things in two places.** The **plan** is a service setting (`semantic_ranker` in `environments.yaml`, applied by Terraform); the **configuration** is in the index, created by the loader. A missing plan fails in one environment only and looks like a code bug.
+- **`metadata_json`** is a retrievable JSON copy of the metadata. LlamaIndex requires such a field (Lesson 09). It's in the schema from the start so Lesson 09 doesn't force a `SCHEMA_VERSION` bump.
 
 ---
 
 ## Loading path 1: push (build this first)
 
-`src/dti_rag/search/loader.py`, run with `make index ENV=dev`. Build it first, even though
-it's more work: you'll know the field names, the vector size and the document shape because
-you constructed every one, and that's what lets you debug retrieval in Lesson 06.
+`src/dti_rag/search/loader.py`, run with `make index ENV=dev`. Build it first, even though it's more work: you'll know the field names, the vector size and the document shape because you constructed every one, and that's what lets you debug retrieval in Lesson 06.
 
 What it does, in order:
 
-1. **Refuses to run without `APP_ENV`.** A loader that defaults to an environment will one
-   day load the wrong one.
+1. **Refuses to run without `APP_ENV`.** A loader that defaults to an environment will one day load the wrong one.
 2. Reads `deploy/<env>.env`, `artifacts/chunks.jsonl` and its SHA-256.
-3. **Reads the `embed` deployment's model and version from the Foundry resource** (the
-   management plane, via `runinfo.py`) and checks it's `text-embedding-3-large`.
+3. **Reads the `embed` deployment's model and version from the Foundry resource** (the management plane, via `runinfo.py`) and checks it's `text-embedding-3-large`.
 4. Creates or updates the index and the small `dti-manifest` index from code.
-5. **Skips everything else if the manifest already records this corpus, schema and embedding
-   model.** A second run is a no-op.
-6. Embeds in batches of 16 with *this environment's* `embed` deployment. Vectors are never
-   copied between environments: the model is pinned identically everywhere, so they're
-   equivalent, and each environment stays self-contained.
-7. Uploads with `mergeOrUpload` in batches, and **checks every per-document result.**
-   Partial failure is normal and doesn't raise; swallowing it gives you an index quietly
-   missing the 2022 edition.
-8. **Deletes orphans.** `mergeOrUpload` never deletes, so a chunk from an old chunking
-   strategy would stay retrievable for ever.
-9. Writes the manifest: schema version, chunks SHA-256 and count, embedding deployment, model
-   and version, load time, git SHA.
+5. **Skips everything else if the manifest already records this corpus, schema and embedding model.** A second run is a no-op.
+6. Embeds in batches of 16 with *this environment's* `embed` deployment. Vectors are never copied between environments: the model is pinned identically everywhere, so they're equivalent, and each environment stays self-contained.
+7. Uploads with `mergeOrUpload` in batches, and **checks every per-document result.** Partial failure is normal and doesn't raise; swallowing it gives you an index quietly missing the 2022 edition.
+8. **Deletes orphans.** `mergeOrUpload` never deletes, so a chunk from an old chunking strategy would stay retrievable for ever.
+9. Writes the manifest: schema version, chunks SHA-256 and count, embedding deployment, model and version, load time, git SHA.
 
-"Which corpus, embedded by which model, is prod serving?" now has an answer that doesn't
-depend on anyone's memory. The smoke test prints it, and every scorecard records it.
+"Which corpus, embedded by which model, is prod serving?" now has an answer that doesn't depend on anyone's memory. The smoke test prints it, and every scorecard records it.
 
 ---
 
 ## Loading path 2: integrated vectorization (the experiment)
 
-`scripts/experiments/integrated_vectorization.py`, **dev only** (it refuses anywhere else).
-It uploads the PDFs to the `corpus` container and builds a data source, a skillset (**Text
-Split** + **AzureOpenAIEmbedding**) with index projections, an index and an indexer, all
-named `dti-iv-experiment`. Run it, check progress with `--status`, query the result in the
-portal's Search Explorer, then **`--delete` it**.
+`scripts/experiments/integrated_vectorization.py`, **dev only** (it refuses anywhere else). It uploads the PDFs to the `corpus` container and builds a data source, a skillset (**Text Split** + **AzureOpenAIEmbedding**) with index projections, an index and an indexer, all named `dti-iv-experiment`. Run it, check progress with `--status`, query the result in the portal's Search Explorer, then **`--delete` it**.
 
-The indexer and embedding skill run **as the Search service's managed identity**: hence
-Lesson 01's roles for it (Storage Blob Data Reader, Cognitive Services OpenAI User). With
-storage keys off, the data source uses the managed-identity connection string
-(`ResourceId=/subscriptions/…;`).
+The indexer and embedding skill run **as the Search service's managed identity**: hence Lesson 01's roles for it (Storage Blob Data Reader, Cognitive Services OpenAI User). With storage keys off, the data source uses the managed-identity connection string (`ResourceId=/subscriptions/…;`).
 
-**The tension worth noticing:** Text Split chunks by size. Look at what came back: section
-IDs gone, edition metadata gone, Section 8's two lines merged into a neighbour. So the honest
-conclusion for *this* corpus:
+**The tension worth noticing:** Text Split chunks by size. Look at what came back: section IDs gone, edition metadata gone, Section 8's two lines merged into a neighbour. So the honest conclusion for *this* corpus:
 
-> Integrated vectorization is excellent when generic chunking is acceptable. Here it isn't.
-> Use the push model with your own section-aware chunks, and use integrated vectorization's
-> **vectorizer**, so query-time embedding is handled for you.
+> Integrated vectorization is excellent when generic chunking is acceptable. Here it isn't. Use the push model with your own section-aware chunks, and use integrated vectorization's **vectorizer**, so query-time embedding is handled for you.
 
-That's the design `schema.py` implements: push-loaded documents, plus an
-`AzureOpenAIVectorizer` on the vector profile. Record the judgement; it belongs in Lesson
-09's `FRAMEWORKS.md`.
+That's the design `schema.py` implements: push-loaded documents, plus an `AzureOpenAIVectorizer` on the vector profile. Record the judgement; it belongs in Lesson 09's `FRAMEWORKS.md`.
 
-**The portal's Import wizard is fine for *seeing* integrated vectorization in dev.** But
-whatever it builds exists in dev only. An index that exists because someone clicked a wizard
-in one environment is drift on day one. Delete it.
+**The portal's Import wizard is fine for *seeing* integrated vectorization in dev.** But whatever it builds exists in dev only. An index that exists because someone clicked a wizard in one environment is drift on day one. Delete it.
 
 ---
 
 ## The demonstration
 
 ```bash
-APP_ENV=dev python scripts/compare_filters.py
+APP_ENV=dev uv run python scripts/compare_filters.py
 ```
 
-The same query three ways: pure vector, `edition_year eq 2024`, and the loss-date range
-`effective_from le 2024-03-15T00:00:00Z and effective_to ge 2024-03-15T00:00:00Z`.
+The same query three ways: pure vector, `edition_year eq 2024`, and the loss-date range `effective_from le 2024-03-15T00:00:00Z and effective_to ge 2024-03-15T00:00:00Z`.
 
-**Look at run 1 properly.** Five editions of 3.4 with scores separated in the third decimal
-place. That's the Lesson 02 argument made visible: the ranking between editions is noise, and
-no reranker fixes noise. Screenshot it; it's the best slide in your capstone.
+**Look at run 1 properly.** Five editions of 3.4 with scores separated in the third decimal place. That's the Lesson 02 argument made visible: the ranking between editions is noise, and no reranker fixes noise. Screenshot it; it's the best slide in your capstone.
 
 ---
 
 ## One loader, three environments
 
-**Terraform builds the Search *service*; the loader owns everything *inside* it.** In dev
-you run `make index`; in test and prod the pipeline runs it as that environment's deploy
-identity (Lesson 13).
+**Terraform builds the Search *service*; the loader owns everything *inside* it.** In dev you run `make index`; in test and prod the pipeline runs it as that environment's deploy identity (Lesson 13).
 
-- **Versioned index name, in code, not config.** A schema change bumps `SCHEMA_VERSION`, so
-  the new index is built *alongside* the old one, and the app that expects it deploys after.
-  Rollback is redeploying the previous app, whose index still exists. The name is the same in
-  every environment, which is why it isn't in `deploy/<env>.env`. Delete old versions once
-  nothing points at them.
-- **The only override** is `AZURE_SEARCH_INDEX_OVERRIDE`, used by Lesson 13's PR gate for a
-  throwaway `dti-policy-pr-<n>` index. Nothing else sets it.
+- **Versioned index name, in code, not config.** A schema change bumps `SCHEMA_VERSION`, so the new index is built *alongside* the old one, and the app that expects it deploys after. Rollback is redeploying the previous app, whose index still exists. The name is the same in every environment, which is why it isn't in `deploy/<env>.env`. Delete old versions once nothing points at them.
+- **The only override** is `AZURE_SEARCH_INDEX_OVERRIDE`, used by Lesson 13's PR gate for a throwaway `dti-policy-pr-<n>` index. Nothing else sets it.
 
 ---
 
@@ -159,8 +110,7 @@ identity (Lesson 13).
 | `pyproject.toml` | changed | `azure-search-documents`; `ops` extra (management SDK, blob) |
 | `Makefile` | changed | `make index ENV=…` |
 
-**Before running:** fill `AZURE_SUBSCRIPTION_ID`, `AZURE_RESOURCE_GROUP`,
-`AZURE_FOUNDRY_ACCOUNT` and `AZURE_STORAGE_ACCOUNT` in `deploy/dev.env`.
+**Before running:** fill `AZURE_SUBSCRIPTION_ID`, `AZURE_RESOURCE_GROUP`, `AZURE_FOUNDRY_ACCOUNT` and `AZURE_STORAGE_ACCOUNT` in `deploy/dev.env`.
 
 ## Project structure at the end of this lesson
 
@@ -217,7 +167,8 @@ DTI-Policy-Helper/
 ├── .pre-commit-config.yaml
 ├── pyproject.toml  ✎ changed
 ├── .python-version
-└── README.md
+├── README.md
+└── uv.lock  ◇ generated
 ```
 
 `★ new` in this lesson · `✎ changed` in this lesson · `◇ generated` by running the code (git-ignored or produced by you) · unmarked: unchanged from earlier lessons
@@ -242,10 +193,7 @@ DTI-Policy-Helper/
 
 ## Done when
 
-Search Explorer (or `compare_filters.py`) returns the correct single-edition clause with a
-metadata filter and cross-edition noise without one, and you can explain the score gap.
-`make index ENV=dev` builds the index from nothing, a second run prints "Nothing to do", and
-`make smoke ENV=dev` prints the manifest. The experiment's objects are deleted.
+Search Explorer (or `compare_filters.py`) returns the correct single-edition clause with a metadata filter and cross-edition noise without one, and you can explain the score gap. `make index ENV=dev` builds the index from nothing, a second run prints "Nothing to do", and `make smoke ENV=dev` prints the manifest. The experiment's objects are deleted.
 
 ## Check yourself
 
@@ -254,11 +202,9 @@ metadata filter and cross-edition noise without one, and you can explain the sco
 3. What does the Text Split skill cost you on *this* corpus?
 4. `merge_or_upload_documents` returned without raising. Why isn't that enough?
 5. Which schema changes force a new index?
-6. Unfiltered, the top five results are five editions of one clause within 0.002 of each
-   other. What does that tell you, and what does it rule out as a fix?
+6. Unfiltered, the top five results are five editions of one clause within 0.002 of each other. What does that tell you, and what does it rule out as a fix?
 7. Why is the index name versioned in code rather than set per environment?
-8. You built a working indexer in dev with the Import wizard. What must happen before test
-   and prod can have it?
+8. You built a working indexer in dev with the Import wizard. What must happen before test and prod can have it?
 
 ---
 

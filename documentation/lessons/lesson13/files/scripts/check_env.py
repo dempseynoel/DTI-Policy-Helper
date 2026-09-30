@@ -1,6 +1,6 @@
 """Compare an environment's LIVE Azure configuration with deploy/environments.yaml.
 
-    python scripts/check_env.py --env test
+    uv run python scripts/check_env.py --env test
 
 Prints every difference and exits 1 if there are any. Read-only: Reader on the resource
 groups is enough. The pipeline runs it before every deploy and blocks on drift; drift.yml

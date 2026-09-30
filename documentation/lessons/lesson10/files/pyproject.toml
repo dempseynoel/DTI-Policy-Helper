@@ -34,6 +34,9 @@ orchestration = [
 ]
 # Lesson 10's LLM-judge metrics. The harness never ships in the container.
 evaluation = ["azure-ai-evaluation>=1.0"]
+
+[dependency-groups]
+# Installed by every `uv sync` and `uv run`; `--no-dev` leaves it out.
 dev = [
   "dti-rag[ingest,ops,orchestration,evaluation]",
   "pre-commit>=3.8",

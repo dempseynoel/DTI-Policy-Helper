@@ -19,6 +19,9 @@ dependencies = [
 [project.optional-dependencies]
 # Ingestion runs on your laptop and in CI, never in the app container.
 ingest = ["pymupdf>=1.24"]
+
+[dependency-groups]
+# Installed by every `uv sync` and `uv run`; `--no-dev` leaves it out.
 dev = [
   "dti-rag[ingest]",
   "pre-commit>=3.8",

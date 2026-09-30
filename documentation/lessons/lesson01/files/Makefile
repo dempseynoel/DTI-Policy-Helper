@@ -2,19 +2,19 @@
 # There is deliberately no default: a command that defaults to an environment will one day
 # default to the wrong one.
 
-PY ?= python
+PY ?= uv run python
 
 .PHONY: setup test lint smoke require-env
 
 setup:
-	$(PY) -m pip install -e ".[dev]"
-	pre-commit install
+	uv sync
+	uv run pre-commit install
 
 test:
 	$(PY) -m pytest
 
 lint:
-	ruff check src tests scripts
+	uv run ruff check src tests scripts
 
 require-env:
 	@case "$(ENV)" in dev|test|prod) ;; \

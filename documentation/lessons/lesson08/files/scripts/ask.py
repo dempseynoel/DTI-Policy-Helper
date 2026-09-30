@@ -13,7 +13,7 @@ from dti_rag.pipeline import answer
 def main() -> None:
     question = " ".join(sys.argv[1:]).strip()
     if not question:
-        sys.exit('usage: python scripts/ask.py "your question"')
+        sys.exit('usage: uv run python scripts/ask.py "your question"')
     result = answer(question)
     a = result.answer
     print(f"mode:     {a.mode}")

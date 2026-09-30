@@ -1,7 +1,6 @@
 # Lesson 00 — Orientation: why a claims assistant isn't a chatbot
 
-**Objective:** understand what you're building, why it's shaped the way it is, and how these
-lessons deliver it, before writing any code.
+**Objective:** understand what you're building, why it's shaped the way it is, and how these lessons deliver it, before writing any code.
 
 **Time:** an hour of reading.
 
@@ -11,18 +10,15 @@ lessons deliver it, before writing any code.
 
 ## What you'll have at the end of Lesson 13
 
-A **production-grade RAG application for the insurance domain**: an assistant a DavidsTown
-Insurance (DTI) claims handler can use, deployed to prod on Azure. It:
+A **production-grade RAG application for the insurance domain**: an assistant a DavidsTown Insurance (DTI) claims handler can use, deployed to prod on Azure. It:
 
 - answers questions about the HomeShield home-insurance policy wording;
 - picks the **edition that governs the claim** from the loss date, and says why;
 - cites the clause, with quoted text, for every figure;
 - asks when the question is genuinely ambiguous, and declines when the wording can't answer;
 - refuses to show a figure it can't trace to the wording;
-- is scored against a 25-question ground-truth bank on every pull request and before every
-  promotion to prod;
-- runs in three environments (dev, test, prod), promoted by a pipeline that stops when
-  an environment has drifted from its recorded configuration.
+- is scored against a 25-question ground-truth bank on every pull request and before every promotion to prod;
+- runs in three environments (dev, test, prod), promoted by a pipeline that stops when an environment has drifted from its recorded configuration.
 
 Every lesson adds one layer and ships the files for it. By Lesson 13 the project is complete.
 
@@ -30,10 +26,7 @@ Every lesson adds one layer and ships the files for it. By Lesson 13 the project
 
 ## Why a claims assistant is not a chatbot
 
-**Being confidently wrong is worse than being unhelpful.** If a handler asks what excess
-applies and the assistant says £350 when the governing edition says £300, a customer has been
-given the wrong number by their insurer. In a regulated firm that's a complaint, possibly a
-Consumer Duty issue, and at scale a remediation exercise.
+**Being confidently wrong is worse than being unhelpful.** If a handler asks what excess applies and the assistant says £350 when the governing edition says £300, a customer has been given the wrong number by their insurer. In a regulated firm that's a complaint, possibly a Consumer Duty issue, and at scale a remediation exercise.
 
 That one constraint drives every design decision:
 
@@ -46,8 +39,7 @@ That one constraint drives every design decision:
 | An answer may be challenged months later | Keep an audit record of the context, edition and prompt for every answer | 13 |
 | A bad change can reach handlers unnoticed | Promote one artefact dev → test → prod, gated by the eval harness | 10, 13 |
 
-Notice what's missing: answer fluency, tone, model choice. They matter, but they aren't what
-makes this hard.
+Notice what's missing: answer fluency, tone, model choice. They matter, but they aren't what makes this hard.
 
 ---
 
@@ -77,16 +69,11 @@ makes this hard.
 
 Three things about this diagram are worth internalising now.
 
-**Routing happens before retrieval.** Deciding *what to filter on* is the highest-leverage
-step. A perfect retriever pointed at the wrong edition returns perfectly wrong answers.
+**Routing happens before retrieval.** Deciding *what to filter on* is the highest-leverage step. A perfect retriever pointed at the wrong edition returns perfectly wrong answers.
 
-**The filter is applied before ranking, not after.** Post-filtering searches all five
-editions, takes the top k, then discards the wrong ones. If the right clause wasn't in that
-top k (likely, with four near-duplicates competing), you get nothing. Lesson 06.
+**The filter is applied before ranking, not after.** Post-filtering searches all five editions, takes the top k, then discards the wrong ones. If the right clause wasn't in that top k (likely, with four near-duplicates competing), you get nothing. Lesson 06.
 
-**Guardrails are a separate, deterministic layer.** A prompt is persuasion; a post-check that
-looks for every figure of the answer in the retrieved context is enforcement. You want both,
-and you need to know which is which.
+**Guardrails are a separate, deterministic layer.** A prompt is persuasion; a post-check that looks for every figure of the answer in the retrieved context is enforcement. You want both, and you need to know which is which.
 
 ---
 
@@ -101,9 +88,7 @@ and you need to know which is which.
 | 4 Evaluation | 10, 11 | the scorecard harness; guardrails; a green scorecard |
 | 5 Production | 12, 13 | the app in dev; test and prod applied from the same code; the gated pipeline; the demo against prod |
 
-**If you're time-boxed**, the irreducible core is **02 → 03 → 04 → 06 → 07 → 08 → 10**:
-metadata-driven retrieval plus honest evaluation. The rest is what makes it a system you
-could put in front of a regulated business.
+**If you're time-boxed**, the irreducible core is **02 → 03 → 04 → 06 → 07 → 08 → 10**: metadata-driven retrieval plus honest evaluation. The rest is what makes it a system you could put in front of a regulated business.
 
 ### Each lesson folder
 
@@ -120,13 +105,9 @@ Apply a lesson with:
 documentation/lessons/apply_lesson.sh 01      # add --dry-run to preview
 ```
 
-The script never overwrites files you fill in by hand (`deploy/environments.yaml`,
-`documentation/design/*.md`) if they already exist. It prints a `diff` command instead.
-`deploy/<env>.env` isn't in any lesson: `terraform apply` writes it.
+The script never overwrites files you fill in by hand (`deploy/environments.yaml`, `documentation/design/*.md`) if they already exist. It prints a `diff` command instead. `deploy/<env>.env` isn't in any lesson: `terraform apply` writes it.
 
-**Read the lesson before copying its files.** The files are the answer key; the README is
-the lesson. Several lessons (02, 03, 07) are much more valuable if you attempt the core
-function yourself first and compare afterwards.
+**Read the lesson before copying its files.** The files are the answer key; the README is the lesson. Several lessons (02, 03, 07) are much more valuable if you attempt the core function yourself first and compare afterwards.
 
 ---
 
@@ -154,36 +135,23 @@ Why the project is laid out the way it is:
 
 ## Conventions fixed now
 
-**Deployment name ≠ model name.** You deploy `text-embedding-3-large` under a name you choose.
-The SDKs (LlamaIndex and LangChain especially) want the *deployment* name. This course names
-deployments by role (`chat`, `embed`, `judge`), so the difference can't be missed and the
-names are identical in every environment.
+**Deployment name ≠ model name.** You deploy `text-embedding-3-large` under a name you choose. The SDKs (LlamaIndex and LangChain especially) want the *deployment* name. This course names deployments by role (`chat`, `embed`, `judge`), so the difference can't be missed and the names are identical in every environment.
 
-**Pin API versions, identically everywhere.** `AZURE_SEARCH_API_VERSION` and
-`AZURE_OPENAI_API_VERSION` live in `deploy/<env>.env`. A different API version in test and
-prod means the eval gate tested something prod doesn't run.
+**Pin API versions, identically everywhere.** `AZURE_SEARCH_API_VERSION` and `AZURE_OPENAI_API_VERSION` live in `deploy/<env>.env`. A different API version in test and prod means the eval gate tested something prod doesn't run.
 
-**No API keys, anywhere, ever.** `DefaultAzureCredential` on your laptop (via `az login`), in
-GitHub Actions (via OIDC) and in Azure (via managed identity). Key access is switched off on
-every resource, dev included.
+**No API keys, anywhere, ever.** `DefaultAzureCredential` on your laptop (via `az login`), in GitHub Actions (via OIDC) and in Azure (via managed identity). Key access is switched off on every resource, dev included.
 
-**Behaviour never branches on the environment.** `APP_ENV` labels telemetry, scorecards and
-logs, and guards destructive scripts. If pipeline code ever says `if env == "prod":`, test
-is no longer a rehearsal for prod.
+**Behaviour never branches on the environment.** `APP_ENV` labels telemetry, scorecards and logs, and guards destructive scripts. If pipeline code ever says `if env == "prod":`, test is no longer a rehearsal for prod.
 
-**`doc_id` is the join key.** `DTI-HOME-PW-2024-v1.0` appears in the PDFs, the fact matrix,
-the QA bank, the chunk metadata, the citations and the evaluators. Don't normalise it,
-lowercase it, or strip its version.
+**`doc_id` is the join key.** `DTI-HOME-PW-2024-v1.0` appears in the PDFs, the fact matrix, the QA bank, the chunk metadata, the citations and the evaluators. Don't normalise it, lowercase it, or strip its version.
 
-**Nothing defaults to an environment.** Every command that touches Azure takes `ENV=dev|test|prod`
-explicitly. A command that defaults to an environment will one day default to the wrong one.
+**Nothing defaults to an environment.** Every command that touches Azure takes `ENV=dev|test|prod` explicitly. A command that defaults to an environment will one day default to the wrong one.
 
 ---
 
 ## Keep this table open while you work
 
-Every question in the QA bank probes one failure mode. "Which case am I trying to make pass
-right now?" is the question that keeps the build honest.
+Every question in the QA bank probes one failure mode. "Which case am I trying to make pass right now?" is the question that keeps the build honest.
 
 | Category (as named in the QA bank) | IDs | Fixed in |
 |---|---|---|
@@ -227,13 +195,10 @@ DTI-Policy-Helper/
 
 1. Why does `evaluation/` sit outside `src/dti_rag/`?
 2. What breaks if the eval harness calls `retrieve()` directly instead of `pipeline.answer()`?
-3. A colleague suggests skipping metadata and using a better embedding model to tell the
-   five editions apart. What's wrong with that plan?
-4. What's the difference between a guardrail in the prompt and a guardrail in code, and why
-   do you want both?
+3. A colleague suggests skipping metadata and using a better embedding model to tell the five editions apart. What's wrong with that plan?
+4. What's the difference between a guardrail in the prompt and a guardrail in code, and why do you want both?
 5. Where does the code that maps a loss date to an edition belong, and why not in the LLM?
-6. Which settings may differ between test and prod, and which must not? Why does the eval
-   gate's value depend on the answer?
+6. Which settings may differ between test and prod, and which must not? Why does the eval gate's value depend on the answer?
 
 ---
 

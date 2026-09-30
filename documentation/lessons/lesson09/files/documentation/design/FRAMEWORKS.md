@@ -24,7 +24,7 @@ use) would move orchestration to LangGraph. This corpus's flows are fixed and sh
 
 ## 2. What each abstraction hid
 
-### LlamaIndex (`AzureAISearchVectorStore`), from `python -m dti_rag.orchestration.llamaindex_retriever`
+### LlamaIndex (`AzureAISearchVectorStore`), from `uv run python -m dti_rag.orchestration.llamaindex_retriever`
 
 | Question | Finding | Evidence |
 |---|---|---|

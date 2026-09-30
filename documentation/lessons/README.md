@@ -1,8 +1,6 @@
 # Lessons v2 — a production RAG application for insurance, built lesson by lesson
 
-Fourteen lessons that take this repository from five policy PDFs and a question bank to an
-edition-aware claims-handler assistant, **deployed to prod on Azure**, evaluated on every pull
-request and before every promotion, with an audit trail for every answer.
+Fourteen lessons that take this repository from five policy PDFs and a question bank to an edition-aware claims-handler assistant, **deployed to prod on Azure**, evaluated on every pull request and before every promotion, with an audit trail for every answer.
 
 Each lesson folder has:
 
@@ -16,22 +14,16 @@ lessonNN/
 ## How to use it
 
 1. Read `lesson00/README.md` first.
-2. For each lesson: **read the README**, attempt the core piece yourself where it suggests
-   (02, 03, 07 especially), then apply the files:
+2. For each lesson: **read the README**, attempt the core piece yourself where it suggests (02, 03, 07 especially), then apply the files:
 
    ```bash
    documentation/lessons/apply_lesson.sh 03            # add --dry-run to preview
    make test
    ```
 
-3. Apply lessons **in order**. Copying lessons 00–13 in sequence reproduces the finished
-   project exactly (verified), and no file is ever deleted by a later lesson.
+3. Apply lessons **in order**. Copying lessons 00–13 in sequence reproduces the finished project exactly (verified), and no file is ever deleted by a later lesson.
 
-`apply_lesson.sh` **never overwrites files you fill in by hand** (`deploy/environments.yaml`,
-`documentation/design/*.md`) if they already exist; it prints a `diff` command instead.
-`deploy/<env>.env` is written by `terraform apply`, never by hand or by a lesson. v1's
-`deploy/dev.env` and `documentation/design/ENVIRONMENTS.md` are replaced in Lesson 01: the
-apply rewrites the first, and the second is superseded by `environments.yaml` and `infra/`.
+`apply_lesson.sh` **never overwrites files you fill in by hand** (`deploy/environments.yaml`, `documentation/design/*.md`) if they already exist; it prints a `diff` command instead. `deploy/<env>.env` is written by `terraform apply`, never by hand or by a lesson. v1's `deploy/dev.env` and `documentation/design/ENVIRONMENTS.md` are replaced in Lesson 01: the apply rewrites the first, and the second is superseded by `environments.yaml` and `infra/`.
 
 ## The lessons
 
@@ -52,17 +44,13 @@ apply rewrites the first, and the second is superseded by `environments.yaml` an
 | [12](lesson12/README.md) | Serve it; deploy to dev | API, UI, image, the app in dev | 149 |
 | [13](lesson13/README.md) | Observability, promotion, capstone | test + prod applied, the gated pipeline, the demo against prod | 163 |
 
-Integration tests (`make test-integration ENV=dev`) add 19 more that run against a live
-environment.
+Integration tests (`make test-integration ENV=dev`) add 19 more that run against a live environment.
 
 ---
 
 ## Review of the v1 lessons: what changed, and why
 
-The v1 lessons (removed from the repo; they're in the first commit, `0d77e13`) are strong on
-*why*. The review found they didn't consistently deliver the objective, a production-grade
-deployment, because they described code that didn't exist, and in places contradicted each
-other, the corpus, or Azure. Every item below is fixed in v2 and backed by code that runs.
+The v1 lessons (removed from the repo; they're in the first commit, `0d77e13`) are strong on *why*. The review found they didn't consistently deliver the objective, a production-grade deployment, because they described code that didn't exist, and in places contradicted each other, the corpus, or Azure. Every item below is fixed in v2 and backed by code that runs.
 
 ### Delivery
 
@@ -112,16 +100,5 @@ other, the corpus, or Azure. Every item below is fixed in v2 and backed by code 
 
 ### What was verified, and what wasn't
 
-- **Verified here:** every lesson's code at its own state (lint + unit tests), on Python 3.11
-  and 3.12, in clean environments; the chunker against the real PDFs (269 chunks, stable
-  SHA-256); the diff that finds the four changes the 2025 summary omits, on the real PDFs;
-  the app running from a container-like layout with only runtime dependencies; workflow YAML
-  parses; applying lessons 00–13 to a copy of this repo reproduces the finished project;
-  every `infra/` folder passes `terraform validate`, `infra/shared` plans against the real
-  subscription, and dev, test and prod pass mocked applies (with and without the app and the
-  judge) whose generated `deploy/<env>.env` passes `check_env`'s configuration check.
-- **Not verified, because it needs your Azure subscription:** anything against live Azure
-  (`terraform apply`, the integration tests, `make index`, `make eval`, the deploy), the portal's current labels,
-  and the Content Safety groundedness **preview** API version. The Docker image wasn't
-  built (no local daemon); its install step was checked separately. Run the integration tests
-  in dev first: they're written to find exactly these problems.
+- **Verified here:** every lesson's code at its own state (lint + unit tests), on Python 3.11 and 3.12, in clean environments; the chunker against the real PDFs (269 chunks, stable SHA-256); the diff that finds the four changes the 2025 summary omits, on the real PDFs; the app running from a container-like layout with only runtime dependencies; workflow YAML parses; applying lessons 00–13 to a copy of this repo reproduces the finished project; every `infra/` folder passes `terraform validate`, `infra/shared` plans against the real subscription, and dev, test and prod pass mocked applies (with and without the app and the judge) whose generated `deploy/<env>.env` passes `check_env`'s configuration check.
+- **Not verified, because it needs your Azure subscription:** anything against live Azure (`terraform apply`, the integration tests, `make index`, `make eval`, the deploy), the portal's current labels, and the Content Safety groundedness **preview** API version. The Docker image wasn't built (no local daemon); its install step was checked separately. Run the integration tests in dev first: they're written to find exactly these problems.

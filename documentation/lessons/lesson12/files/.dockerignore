@@ -3,6 +3,7 @@
 # The same image digest is promoted dev -> test -> prod; configuration arrives at runtime.
 *
 !pyproject.toml
+!uv.lock
 !src/
 !data/fact_matrix/editions_fact_matrix.csv
 **/__pycache__

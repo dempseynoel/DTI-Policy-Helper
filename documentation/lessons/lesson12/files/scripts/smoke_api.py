@@ -1,7 +1,7 @@
 """Smoke-test a DEPLOYED app through its API. Deterministic checks only.
 
-    python scripts/smoke_api.py --base-url https://ca-dti-rag-dev.<...>.azurecontainerapps.io
-    python scripts/smoke_api.py --base-url ... --token "$(az account get-access-token \
+    uv run python scripts/smoke_api.py --base-url https://ca-dti-rag-dev.<...>.azurecontainerapps.io
+    uv run python scripts/smoke_api.py --base-url ... --token "$(az account get-access-token \
         --resource "$APP_AUDIENCE" --query accessToken -o tsv)"      # behind Entra ID auth
 
 Checks the things only a deployment can get wrong: the image, the identity's roles, the

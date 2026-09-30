@@ -14,11 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # .venv on PATH, filled with exactly what uv.lock pins. --locked fails if uv.lock
+      # is out of date with pyproject.toml: commit both together.
+      - uses: astral-sh/setup-uv@v7
         with:
-          python-version: "3.12"
-          cache: pip
-      - run: pip install -e ".[dev]"
+          activate-environment: true
+      - run: uv sync --locked
       - run: ruff check src tests scripts evaluation
       - name: Unit tests (no network)
         run: pytest

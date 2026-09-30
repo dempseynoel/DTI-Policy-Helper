@@ -1,6 +1,6 @@
 """Build the corpus map from the fact matrix: which facts change in which edition.
 
-    python scripts/build_corpus_map.py > documentation/design/corpus_map.md
+    uv run python scripts/build_corpus_map.py > documentation/design/corpus_map.md
 
 The fact matrix is convenience data. This script also reports where the matrix asserts a
 value for a clause that doesn't exist in that edition: the table-vs-wording trap (DTI-014),

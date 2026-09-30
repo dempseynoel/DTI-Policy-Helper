@@ -25,6 +25,9 @@ ops = [
   "azure-mgmt-cognitiveservices>=13.5",
   "azure-storage-blob>=12.20",
 ]
+
+[dependency-groups]
+# Installed by every `uv sync` and `uv run`; `--no-dev` leaves it out.
 dev = [
   "dti-rag[ingest,ops]",
   "pre-commit>=3.8",

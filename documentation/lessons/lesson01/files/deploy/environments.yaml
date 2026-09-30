@@ -7,8 +7,8 @@
 # To change anything: edit this file, `terraform apply` in infra/dev, then infra/test, then
 # infra/prod, and commit. A change isn't finished until every environment has been applied.
 
-subscription_id: "8b4a7bcf-cd21-41f0-aedf-b58029e38750"
-owner: noel
+subscription_id: "e523f9df-3217-4ed7-9709-5247badceb38"
+owner: Noel
 budget_emails: [noel.dempsey@outlook.com]
 
 # Lesson 13: the GitHub repository ("owner/name") the pipeline identities trust. While it's
@@ -70,7 +70,7 @@ environments:
     log_retention_days: 30
     audit_retention_days: 30
     trace_sampling_ratio: 1.0
-    budget: 100  # monthly; one Search unit alone is ~US$74
+    budget: 100  # monthly; one Search unit alone is ~£54
 
   test:
     resource_group: rg-dti-rag-test

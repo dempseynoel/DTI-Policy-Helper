@@ -1,10 +1,10 @@
 """Score the whole bank in one command.
 
-    make eval ENV=dev                                   # current pipeline, in-process, judged
-    python -m evaluation.run_eval --pipeline baseline   # the naive control group
-    python -m evaluation.run_eval --target api --base-url https://...  (Lesson 13)
-    python -m evaluation.run_eval --rescore artifacts/eval/<run>/run.json   # no regeneration
-    python -m evaluation.run_eval --compare evaluation/baselines/reference-test.json
+    make eval ENV=dev                                         # current pipeline, in-process, judged
+    uv run python -m evaluation.run_eval --pipeline baseline  # the naive control group
+    uv run python -m evaluation.run_eval --target api --base-url https://...  (Lesson 13)
+    uv run python -m evaluation.run_eval --rescore artifacts/eval/<run>/run.json   # no regeneration
+    uv run python -m evaluation.run_eval --compare evaluation/baselines/reference-test.json
 
 Running the pipeline and scoring it are separate steps: the run is cached as run.json, so
 evaluators can be iterated on without paying for generation again.

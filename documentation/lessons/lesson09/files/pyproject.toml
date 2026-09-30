@@ -32,6 +32,9 @@ orchestration = [
   "llama-index-embeddings-azure-openai>=0.3",
   "llama-index-vector-stores-azureaisearch>=0.3",
 ]
+
+[dependency-groups]
+# Installed by every `uv sync` and `uv run`; `--no-dev` leaves it out.
 dev = [
   "dti-rag[ingest,ops,orchestration]",
   "pre-commit>=3.8",

@@ -1,6 +1,6 @@
 """Compare a scorecard with a reference, and gate on it.
 
-    python -m evaluation.compare REFERENCE.json CANDIDATE.json [--summary out.md]
+    uv run python -m evaluation.compare REFERENCE.json CANDIDATE.json [--summary out.md]
 
 Refuses to compare scorecards from different sources (serving model versions, index
 manifest): a "regression" that is really a model upgrade or an environment mismatch

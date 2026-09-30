@@ -1,7 +1,7 @@
 """Delete the PR gate's throwaway indexes on test's Search service.
 
-    APP_ENV=test python scripts/sweep_pr_indexes.py --index dti-policy-pr-42   # one PR's
-    APP_ENV=test python scripts/sweep_pr_indexes.py --all                      # nightly sweep
+    APP_ENV=test uv run python scripts/sweep_pr_indexes.py --index dti-policy-pr-42  # one PR's
+    APP_ENV=test uv run python scripts/sweep_pr_indexes.py --all                     # nightly sweep
 
 Basic tier has a small index limit, so a leaked PR index eventually fails an unrelated PR.
 Runs in test only, and only ever touches indexes named dti-policy-pr-*.
