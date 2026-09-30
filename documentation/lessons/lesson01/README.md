@@ -134,6 +134,7 @@ Once (`infra/shared`):
 | Container registry `crdtirag` | One image per commit, promoted by digest through every environment. Admin user off; accepts managed-identity pulls | 12 |
 | Your AcrPush and Container Registry Tasks Contributor on the registry | You build dev images by hand in Lesson 12 (`az acr build` runs an ACR Task, which pushes). Off in Lesson 13 (`human_push_allowed`) | 12 |
 | `id-dti-rag-build`, `-eval`, `-drift` | Pipeline identities, each trusted by one kind of GitHub job through a federated credential, once `github_repository` is set. No secrets | 13 |
+| `Microsoft.App` resource provider registration | Container Apps can't be created in a subscription until it's registered, and the azurerm provider doesn't register it itself | 01 |
 | Three Azure Policy assignments, effect **Audit** | Independent evidence that key access stays off on AI Services, Search and Storage, including on anything built outside Terraform | 01 |
 
 ### Naming
@@ -186,7 +187,7 @@ If you built any of this by hand before, delete it first (including the resource
 | `shared.foundry_local_auth_disabled: true` | Key access off on Foundry | The one setting the portal can't make, so the one most likely to be forgotten by hand. In code it can't be, and the audit policy checks it anyway |
 | `shared.deployments` | Pin the version; **no auto-upgrade** | A pinned deployment never changes under you, and stops working when its version retires. The retirement date is your deadline |
 | `shared.deployments.chat` | A model that **accepts `temperature=0`** | Every call in this project uses it for reproducibility. Some reasoning models reject it; the smoke test fails fast if yours does |
-| `shared.deployments.*.sku` | Deployment type (Global Standard / Data Zone Standard / Standard) | A data-residency decision. `chat` is Global Standard (`gpt-4.1` has no regional Standard quota in UK South); `embed` is Standard, in UK South. Claims context goes to `chat`, so its type is the one compliance would ask about. In a regulated firm compliance owns it. Write down what you'd ask them |
+| `shared.deployments.*.sku` | Deployment type (Global Standard / Data Zone Standard / Standard) | A data-residency decision. `chat` and `embed` are both Standard, in UK South. `chat` is `gpt-4.1-mini` because it has regional Standard quota in UK South; `gpt-4.1` has none there, and new subscriptions often have no Global Standard quota for it either. Claims context goes to `chat`, so its type is the one compliance would ask about. In a regulated firm compliance owns it. Write down what you'd ask them |
 | `foundry.tf` | Deployments one at a time | The service rejects concurrent deployment changes on one Foundry resource with a 409 |
 | `search.tf` | Tier **Basic**, **RBAC only** | The portal's default is *API keys only*, which rejects valid role assignments with 401/403. Free tier: one per subscription, and no managed identity for indexers |
 | `shared.semantic_ranker: standard` | Even in dev | The free plan's allowance runs out mid-eval and looks like a retrieval bug |
@@ -337,7 +338,7 @@ DTI-Policy-Helper/
 | Project features missing, SDK errors about hubs | The resource is an *Azure AI hub* (`azurerm_ai_foundry`), not a *Foundry* resource |
 | Can't upload to the storage container in the portal | Key access is off and you have no Storage Blob Data role |
 | `plan` in `infra/dev` fails: identity or registry not found | `infra/shared` hasn't been applied |
-| `apply` fails on a deployment: `InsufficientQuota` | dev + test + prod TPM exceeds the shared regional quota for that model and deployment type |
+| `apply` fails on a deployment: `InsufficientQuota` | dev + test + prod TPM exceeds the shared regional quota for that model and deployment type. If the error says the quota limit is 0, the subscription has none for that model: request it (Foundry portal, Quota) or choose a model you have quota for (`az cognitiveservices usage list --location uksouth`) |
 | `apply` fails on a deployment: 409 `RequestConflict` | Another change to the same Foundry resource is still running. Run `apply` again |
 | `apply` fails: name already in use | A soft-deleted Foundry resource or Key Vault holds it (purge it), or someone else in Azure has it (rename in `environments.yaml`) |
 | `apply` fails: resource already exists | Something built by hand is still there. Delete it, or `terraform import` it |

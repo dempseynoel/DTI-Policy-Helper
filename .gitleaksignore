@@ -1,0 +1,6 @@
+# Reviewed findings gitleaks may skip. Each line is a fingerprint (file:rule:line) from its output.
+# If the file changes and the line moves, the finding comes back: review it again and update this.
+
+# App Insights connection string: an ingestion key, not a credential. It can send telemetry,
+# not read it (Lesson 01).
+deploy/dev.env:generic-api-key:36
