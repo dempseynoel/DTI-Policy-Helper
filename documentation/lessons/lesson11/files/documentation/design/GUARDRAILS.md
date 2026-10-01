@@ -1,7 +1,6 @@
 # Guardrails
 
-What can go wrong, what stops it, and the evidence that it does. Identical in every
-environment: no setting disables any control.
+What can go wrong, what stops it, and the evidence that it does. Identical in every environment: no setting disables any control.
 
 ## 1. Threat model (most severe first)
 
@@ -52,8 +51,7 @@ environment: no setting disables any control.
 | Groundedness: ungrounded | **Flag** | Model-based, so it has false positives; blocking on it would cause outages |
 | Groundedness: unavailable | Recorded as unavailable; answer shown | The deterministic check still ran |
 
-Groundedness latency: measure p50/p95 with and without it (Lesson 13 dashboard). If it
-doubles p95, move it to an asynchronous flag after the response rather than inline.
+Groundedness latency: measure p50/p95 with and without it (Lesson 13 dashboard). If it doubles p95, move it to an asynchronous flag after the response rather than inline.
 
 ## 5. Logging and retention
 
@@ -68,9 +66,7 @@ doubles p95, move it to an asynchronous flag after the response rather than inli
 
 ## 6. Scope statement
 
-The assistant surfaces HomeShield policy wording, with citations, to help a claims handler.
-It does not make coverage decisions and does not give legal advice. The customer's schedule
-takes priority over the wording, and the assistant says so.
+The assistant surfaces HomeShield policy wording, with citations, to help a claims handler. It does not make coverage decisions and does not give legal advice. The customer's schedule takes priority over the wording, and the assistant says so.
 
 ## 7. Known gaps
 

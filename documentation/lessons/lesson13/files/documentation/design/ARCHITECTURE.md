@@ -1,14 +1,10 @@
 # Architecture and design
 
-The capstone design document: what the system is, why it's built this way, how a change
-reaches production, and what the system deliberately refuses to do.
+The capstone design document: what the system is, why it's built this way, how a change reaches production, and what the system deliberately refuses to do.
 
 ## 1. The problem
 
-Five editions of the HomeShield policy wording say nearly the same thing with different
-numbers. A claims handler needs the figure from **the edition that governs the claim**,
-with the clause it came from. Being confidently wrong is worse than being unhelpful: a
-wrong excess is a customer misinformed by their insurer.
+Five editions of the HomeShield policy wording say nearly the same thing with different numbers. A claims handler needs the figure from **the edition that governs the claim**, with the clause it came from. Being confidently wrong is worse than being unhelpful: a wrong excess is a customer misinformed by their insurer.
 
 ## 2. The system
 
@@ -27,8 +23,7 @@ wrong excess is a customer misinformed by their insurer.
                                                               └─► audit/<trace_id>.json (complete, redacted)
 ```
 
-Everything that answers a question goes through `pipeline.answer()`: the API, the eval
-harness and the scripts. What is evaluated is what ships.
+Everything that answers a question goes through `pipeline.answer()`: the API, the eval harness and the scripts. What is evaluated is what ships.
 
 ## 3. The three policies
 
@@ -62,22 +57,13 @@ harness and the scripts. What is evaluated is what ships.
  nightly  drift.yml: check_env × 3 (read-only identity) + sweep PR indexes
 ```
 
-**Infrastructure is code, configuration is generated, code is promoted.** Terraform
-(`infra/`) builds every environment from `deploy/environments.yaml` and writes each one's
-`deploy/<env>.env`. Isolation is enforced by identity: each environment's deploy identity has
-roles only in its own environment, and GitHub hands it out only to jobs that declare that
-environment.
+**Infrastructure is code, configuration is generated, code is promoted.** Terraform (`infra/`) builds every environment from `deploy/environments.yaml` and writes each one's `deploy/<env>.env`. Isolation is enforced by identity: each environment's deploy identity has roles only in its own environment, and GitHub hands it out only to jobs that declare that environment.
 
-**How do I know test is a faithful rehearsal of prod?** Everything that changes behaviour is
-in the shared section of `deploy/environments.yaml`, so Terraform gives test and prod the same
-values; only capacity, access and protection differ. `check_env` compares both with that file
-before every deploy and nightly, so an environment that wasn't applied, or was changed by
-hand, can't be deployed to.
+**How do I know test is a faithful rehearsal of prod?** Everything that changes behaviour is in the shared section of `deploy/environments.yaml`, so Terraform gives test and prod the same values; only capacity, access and protection differ. `check_env` compares both with that file before every deploy and nightly, so an environment that wasn't applied, or was changed by hand, can't be deployed to.
 
 ## 6. Capstone demo runbook
 
-Demo live, against **prod**. Lead with case 1 shown twice: the baseline (£350, wrong) then
-the real pipeline (£300, cited).
+Demo live, against **prod**. Lead with case 1 shown twice: the baseline (£350, wrong) then the real pipeline (£300, cited).
 
 | # | Case | Question | Expected |
 |---|---|---|---|
@@ -91,15 +77,12 @@ the real pipeline (£300, cited).
 | 8 | Cross-section | A burst loft pipe collapsed a ceiling. Which section? | **§3**, not §7.2; £350 |
 | 9 | Abstention | 2021 edition excess? / Is my car covered? | **Decline**, with reasons and the nearest clause |
 
-Case 5 is the one an insurance audience remembers: cover that was never sold. Case 9 reads
-as a limitation until you explain that the alternative was inventing a figure.
+Case 5 is the one an insurance audience remembers: cover that was never sold. Case 9 reads as a limitation until you explain that the alternative was inventing a figure.
 
 ## 7. The capstone package
 
 1. The deployed app (repo + prod URL), deployed by the pipeline.
 2. The eval harness and scorecard, wired in as both gates.
-3. This document and the design records: `SCHEMA.md`, `FRAMEWORKS.md`, `GUARDRAILS.md`,
-   `OBSERVABILITY.md`; and `deploy/environments.yaml` with `infra/`, which define every
-   environment.
+3. This document and the design records: `SCHEMA.md`, `FRAMEWORKS.md`, `GUARDRAILS.md`, `OBSERVABILITY.md`; and `deploy/environments.yaml` with `infra/`, which define every environment.
 4. The baseline comparison (`baseline_failures.md` and the scorecards).
 5. The error-analysis log, wrong hypotheses included.

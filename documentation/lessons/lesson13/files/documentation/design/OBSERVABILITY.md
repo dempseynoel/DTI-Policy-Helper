@@ -1,7 +1,6 @@
 # Observability
 
-Traces go to each environment's own Application Insights. The audit log is a separate store
-(blob, `audit/<trace_id>.json`), described in `src/dti_rag/observability/audit.py`.
+Traces go to each environment's own Application Insights. The audit log is a separate store (blob, `audit/<trace_id>.json`), described in `src/dti_rag/observability/audit.py`.
 
 | | Traces | Audit log |
 |---|---|---|
@@ -12,8 +11,7 @@ Traces go to each environment's own Application Insights. The audit log is a sep
 
 ## Spans
 
-`chat` (per request) → `route` → `retrieve` → `generate` → `guardrail_check`.
-Custom spans land in the `dependencies` table; attributes are in `customDimensions`.
+`chat` (per request) → `route` → `retrieve` → `generate` → `guardrail_check`. Custom spans land in the `dependencies` table; attributes are in `customDimensions`.
 
 | Attribute | On span | Why |
 |---|---|---|
@@ -28,9 +26,7 @@ Custom spans land in the `dependencies` table; attributes are in `customDimensio
 
 ## Workbook queries
 
-Build the workbook once, in dev. Then copy its JSON (the workbook's **Advanced editor**)
-into `deploy/workbook.json` and import it into test and prod. Three hand-built dashboards
-drift like three hand-built environments.
+Build the workbook once, in dev. Then copy its JSON (the workbook's **Advanced editor**) into `deploy/workbook.json` and import it into test and prod. Three hand-built dashboards drift like three hand-built environments.
 
 **Latency by stage (p50 / p95):**
 
@@ -72,9 +68,7 @@ dependencies
 
 ## Alerts
 
-**Portal:** App Insights → **Alerts** → **Create** → **Alert rule** → Custom log search.
-Record each rule's threshold in the table below. Alert rules aren't in Terraform yet
-(`infra/README.md`): once the thresholds settle, they belong there.
+**Portal:** App Insights → **Alerts** → **Create** → **Alert rule** → Custom log search. Record each rule's threshold in the table below. Alert rules aren't in Terraform yet (`infra/README.md`): once the thresholds settle, they belong there.
 
 | Alert | Query (above) | Condition | prod | test | dev |
 |---|---|---|---|---|---|

@@ -2,8 +2,7 @@
 
 Which tool for which layer, and why. Evidence first; opinions only where labelled.
 
-Code: `src/dti_rag/orchestration/` (`llamaindex_retriever.py`, `graph.py`). Both stacks sit
-on the same index (`dti-policy-v1`), so only the orchestration layer changes.
+Code: `src/dti_rag/orchestration/` (`llamaindex_retriever.py`, `graph.py`). Both stacks sit on the same index (`dti-policy-v1`), so only the orchestration layer changes.
 
 ---
 
@@ -17,8 +16,7 @@ on the same index (`dti-policy-v1`), so only the orchestration layer changes.
 | Routing and orchestration | Own code (`pipeline.py`), **designed in LangGraph** | The graph clarified the compare branch and the post-retrieval ambiguity check; both were ported to ~40 lines of plain code |
 | Generation | OpenAI SDK, structured outputs | One call shape everywhere; every call auditable |
 
-**What would change the decision:** a genuinely agentic flow (open-ended multi-step tool
-use) would move orchestration to LangGraph. This corpus's flows are fixed and short.
+**What would change the decision:** a genuinely agentic flow (open-ended multi-step tool use) would move orchestration to LangGraph. This corpus's flows are fixed and short.
 
 ---
 
@@ -54,8 +52,7 @@ Run in **dev only**, and delete what they create afterwards.
 | Azure AI Search agentic retrieval | ____ | ____ | ____ | ____ | GA or preview in the pinned API version? ____ |
 | Foundry Agent Service, File Search | ____ | ____ | ____ | ____ | Doesn't know the metadata schema |
 
-The expected shape: managed options do well on simple lookups and poorly on edition
-selection. That gap is the value of Lessons 02–07. Quantify it.
+The expected shape: managed options do well on simple lookups and poorly on edition selection. That gap is the value of Lessons 02–07. Quantify it.
 
 ---
 
@@ -65,8 +62,7 @@ selection. That gap is the value of Lessons 02–07. Quantify it.
 
 - Own code: yes. The OData filter sent, the prompt version and the chunks are all logged.
 - LlamaIndex: mostly, but the filter mode is implicit and the node reconstruction is opaque.
-- Agentic retrieval / File Search: the sub-queries and ranking are the service's; you can log
-  inputs and outputs, not the reasoning in between.
+- Agentic retrieval / File Search: the sub-queries and ranking are the service's; you can log inputs and outputs, not the reasoning in between.
 
 ---
 

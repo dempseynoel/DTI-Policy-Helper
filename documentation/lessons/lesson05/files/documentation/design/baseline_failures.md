@@ -1,7 +1,6 @@
 # Baseline failures
 
-The naive pipeline (`src/dti_rag/retrieval/baseline.py`): embed → vector top-5, no filters →
-stuff → generate at temperature 0. The control group for every later comparison.
+The naive pipeline (`src/dti_rag/retrieval/baseline.py`): embed → vector top-5, no filters → stuff → generate at temperature 0. The control group for every later comparison.
 
 **Run:** `make baseline ENV=dev` · raw output: `evaluation/baselines/naive-baseline-dev.json`
 
@@ -16,8 +15,7 @@ stuff → generate at temperature 0. The control group for every later compariso
 
 ## The five mechanisms
 
-Fill the "Baseline gave" and "Gold retrieved?" columns from your run. The expected failures
-are what this corpus is built to produce; if yours differ, say why.
+Fill the "Baseline gave" and "Gold retrieved?" columns from your run. The expected failures are what this corpus is built to produce; if yours differ, say why.
 
 | QA ID | Category | Expected | Baseline gave | Gold retrieved? | Mechanism |
 |---|---|---|---|---|---|
@@ -36,5 +34,4 @@ Paste the table `run_baseline.py` printed.
 - Pass rate by category: ____
 - Retrieval failures (gold doc never arrived): ____ of ____ failures → fixed in Lessons 06–07
 - Generation failures (gold doc arrived, answer still wrong): ____ of ____ → Lesson 08
-- A pass to be suspicious of: ____ (for example DTI-010: right figure, no "earlier editions
-  differ" caveat)
+- A pass to be suspicious of: ____ (for example DTI-010: right figure, no "earlier editions differ" caveat)
